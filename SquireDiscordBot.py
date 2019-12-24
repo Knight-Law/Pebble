@@ -7,8 +7,8 @@ from discord import Game
 from discord.ext.commands import Bot
 
 BOT_PREFIX = (".")
-STEAMAPI = 'D5BBA0504E01F741297E4C8F4930F55E'
-TOKEN = 'NjU4ODcyMzcyMTQwNDQxNjAy.XgGE-g.-Kad4RiWZ5jGPogFksjAhQAcSqI'
+STEAMAPI = '?'
+TOKEN = '?'
 
 client = Bot(command_prefix=BOT_PREFIX)
 
@@ -52,7 +52,7 @@ async def whatGame(context):
         'Black Desert Online',
     ]
     await client.say(random.choice(possible_responses))
-
+#dasdsadsa
 @client.command(name='steamTest',
                 description="TBD",
                 brief="TBD",
