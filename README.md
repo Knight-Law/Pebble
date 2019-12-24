@@ -1,0 +1,2 @@
+# Squire
+Discord Bot 
