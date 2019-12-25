@@ -1,2 +1,2 @@
 # Squire
-Discord Bot 
+Personal Discord Bot
