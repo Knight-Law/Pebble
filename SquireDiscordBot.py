@@ -3,11 +3,13 @@ import asyncio
 import aiohttp
 import json
 import requests
+import os
+import sys
 from discord import Game
 from discord.ext.commands import Bot
 
 try:
-    fp = open('C:/Users/Lawrence/Desktop/token.txt','r')
+    fp = open(os.path.join(sys.path[0], 'config.txt'), 'r')
     TOKEN = fp.read()
 finally:
     fp.close()
@@ -99,7 +101,5 @@ async def whatGame(context):
         'Left 4 Dead',
     ]
     await client.say(random.choice(possible_responses))
-
-
 
 client.run(TOKEN)
