@@ -62,7 +62,7 @@ async def on_message(message):
         content = message.content
         channel = message.channel
         await client.add_reaction(message,'🎂')
-        await client.send_message(channel,"Happy Birthday!!!")
+        #await client.send_message(channel,"Happy Birthday!!!")
 
     if message.author.id == '96746583445475328': #Mark
         author = message.author
@@ -115,7 +115,8 @@ async def mabiServerStatus(context):
         data = json.loads(url.read().decode())
     total = []
     combine = ""
-    for i in range (12):
+    size = (len(data['game']['servers'][0]['channels']))
+    for i in range (size):
         total.append(json.dumps(data['game']['servers'][0]['channels'][i]['name'] ) + " : " + json.dumps(data['game']['servers'][0]['channels'][i]['stress']) + '%')
         combine += total[i] +'\n'
     embed = discord.Embed(title="Nao Server Status", color=0x00ff00)
