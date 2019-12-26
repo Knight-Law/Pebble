@@ -68,7 +68,7 @@ async def on_message(message):
         author = message.author
         content = message.content
         channel = message.channel
-        await client.send_message(channel,"Fuck you Mark")
+        await client.send_message(channel,"************")
     
     if message.author.id == '97590532380827648': #Law
         author = message.author
