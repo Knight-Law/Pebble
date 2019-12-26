@@ -5,6 +5,8 @@ import json
 import requests
 import os
 import sys
+import urllib.request
+import discord
 from discord import Game
 from discord.ext.commands import Bot
 
@@ -17,7 +19,8 @@ finally:
 BOT_PREFIX = (".")
 
 client = Bot(command_prefix=BOT_PREFIX)
-
+#Specialize message responding based on userID
+#Note to self. Add message to an SQL table that's adjustable by command
 @client.event
 async def on_message(message):
     await client.process_commands(message)
@@ -65,7 +68,7 @@ async def on_message(message):
         author = message.author
         content = message.content
         channel = message.channel
-        await client.send_message(channel,"I support breast cancer")
+        await client.send_message(channel,"Fuck you Mark")
     
     if message.author.id == '97590532380827648': #Law
         author = message.author
@@ -77,6 +80,7 @@ async def on_message(message):
         #await client.add_reaction(message,'a:hc:659191821506838528')
         return
 
+#Command to suggest a random game from a list
 @client.command(name='playwhat',
                 description="TBD",
                 brief="TBD",
@@ -101,5 +105,20 @@ async def whatGame(context):
         'Left 4 Dead',
     ]
     await client.say(random.choice(possible_responses))
-
+#showcases the current server status of Mabinogi's Nao server using an API
+@client.command(name='naoStatus',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+async def mabiServerStatus(context):
+    with urllib.request.urlopen("http://mabi.world/mss/status.json") as url:
+        data = json.loads(url.read().decode())
+    total = []
+    combine = ""
+    for i in range (12):
+        total.append(json.dumps(data['game']['servers'][0]['channels'][i]['name'] ) + " : " + json.dumps(data['game']['servers'][0]['channels'][i]['stress']) + '%')
+        combine += total[i] +'\n'
+    embed = discord.Embed(title="Nao Server Status", color=0x00ff00)
+    embed.add_field(name="Channels", value=combine, inline=False)
+    await client.say(embed=embed)
 client.run(TOKEN)
