@@ -118,7 +118,34 @@ async def mabiServerStatus(context):
     size = (len(data['game']['servers'][0]['channels']))
     for i in range (size):
         total.append(json.dumps(data['game']['servers'][0]['channels'][i]['name'] ) + " : " + json.dumps(data['game']['servers'][0]['channels'][i]['stress']) + '%')
-        combine += total[i] +'\n'
+        #combine += total[i] +'\n'
+#---------------
+    hold = '' 
+    for i in range(0, len(total)): 
+        if(total[i].startswith('"Ch')): 
+            end = total[i].index('"', 1) 
+            start = total[i].index('h', 1) + 1 
+            part = total[i][start:end] 
+            total[i] = total[i].partition(part) 
+        else: 
+            hold = i 
+
+    hold = total.pop(hold) 
+
+    for i in range(0, len(total)): 
+        total[i] = list(total[i]) 
+        total[i][1] = int(total[i][1]) 
+
+    a = sorted(total, key=lambda x: x[1]) 
+    for i in range(len(a)): 
+        concat = '' 
+        for c in a[i]: 
+            concat += str(c) 
+        a[i] = concat 
+    a.append(hold) 
+    for i in range (size):
+        combine += a[i] +'\n'
+#----------------
     embed = discord.Embed(title="Nao Server Status", color=0x00ff00)
     embed.add_field(name="Channels", value=combine, inline=False)
     await client.say(embed=embed)
