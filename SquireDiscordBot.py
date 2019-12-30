@@ -103,6 +103,7 @@ async def whatGame(context):
         'Dont Starve Together',
         'Monaco',
         'Left 4 Dead',
+        'Buy a new game on steam',
     ]
     await client.say(random.choice(possible_responses))
 #showcases the current server status of Mabinogi's Nao server using an API
