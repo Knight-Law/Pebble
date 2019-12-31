@@ -68,7 +68,7 @@ async def on_message(message):
         channel = message.channel
         if (int(responseType[choice])==1):
             await client.send_message(channel,response[choice])
-        elif (int(responseType[choice])==0)::
+        elif (int(responseType[choice])==0):
             await client.add_reaction(message,response[choice])
         else:
             return
