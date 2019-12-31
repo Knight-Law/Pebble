@@ -10,6 +10,12 @@ import discord
 from discord import Game
 from discord.ext.commands import Bot
 
+userAmount = 0
+userID = list()
+name = list()
+responseType = list()
+response = list()
+
 try:
     fp = open(os.path.join(sys.path[0], 'config.txt'), 'r')
     TOKEN = fp.read()
@@ -17,63 +23,56 @@ finally:
     fp.close()
 
 BOT_PREFIX = (".")
-
 client = Bot(command_prefix=BOT_PREFIX)
+
+
+try:
+    fp = open(os.path.join(sys.path[0], 'users.txt'), 'r')
+    userAmount = int(fp.readline())
+    for x in range(userAmount):
+            userID.append(fp.readline().rstrip('\n'))
+            name.append(fp.readline().rstrip('\n'))
+            responseType.append(fp.readline().rstrip('\n'))
+            response.append(fp.readline().rstrip('\n'))
+finally:
+    fp.close()
+
+
+users = ([userID,name,responseType,response])
+
+print (users)
+
+
+
+
+
 #Specialize message responding based on userID
-#Note to self. Add message to an SQL table that's adjustable by command
+    #Note to self. Add message to an SQL table that's adjustable by command
+    #Issues with implementing a SQL database, will use a .txt file as a temporary work around
 @client.event
 async def on_message(message):
     await client.process_commands(message)
+    choice = 99999999
+    for x in range (len(userID)):
+        if (message.author.id==userID[x]):
+            choice = x
+        else:
+            return
+
     if message.author == client.user:
         return
 
-    if message.author.id == '124969272698077184': #HY
+    if message.author.id == userID[choice]: 
         author = message.author
         content = message.content
         channel = message.channel
-        await client.send_message(channel,"SUP HY!")
+        if (int(responseType[choice])==1):
+            await client.send_message(channel,response[choice])
+        elif (int(responseType[choice])==0)::
+            await client.add_reaction(message,response[choice])
+        else:
+            return
 
-    if message.author.id == '148338773887811587': #Chi
-        author = message.author
-        content = message.content
-        channel = message.channel
-        await client.add_reaction(message,':yikes:589332576909525012')
-
-    if message.author.id == '136297703029080065': #CB
-        author = message.author
-        content = message.content
-        channel = message.channel
-        await client.send_message(channel,"Phanpy stuff I guess")
-
-    if message.author.id == '102636726811389952': #Anthony
-        author = message.author
-        content = message.content
-        channel = message.channel
-        await client.add_reaction(message,'a:hc:659191821506838528')
-
-    if message.author.id == '137291885130678272': #Mike
-        author = message.author
-        content = message.content
-        channel = message.channel
-        await client.send_message(channel,"1 gift for 2 days")
-
-    if message.author.id == '122867560210235392': #Jen
-        author = message.author
-        content = message.content
-        channel = message.channel
-        await client.add_reaction(message,'🎂')
-        #await client.send_message(channel,"Happy Birthday!!!")
-
-    if message.author.id == '96746583445475328': #Mark
-        author = message.author
-        content = message.content
-        channel = message.channel
-        await client.send_message(channel,"************")
-    
-    if message.author.id == '97590532380827648': #Law
-        author = message.author
-        content = message.content
-        channel = message.channel
         #emoji = '\:slight_smile: '
         #await client.send_message(channel,"I support breast cancer")
         #await client.add_reaction(message,':yikes:589332576909525012')
@@ -150,4 +149,29 @@ async def mabiServerStatus(context):
     embed = discord.Embed(title="Nao Server Status", color=0x00ff00)
     embed.add_field(name="Channels", value=combine, inline=False)
     await client.say(embed=embed)
+
+
+
+@client.command(name='save',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+async def saveToFile(context):
+    fp = open(os.path.join(sys.path[0], 'configTest.txt'), 'w')
+    fp.write(str(userAmount)+'\n')
+    for x in range(userAmount):
+        fp.write(userID[x]+'\n')
+        fp.write(name[x]+'\n')
+        fp.write(responseType[x]+'\n')
+        fp.write(response[x]+'\n') 
+    fp.close()
+
+@client.command(name='exit',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+async def endProgram(context):
+    client.close()
+    sys.exit()
+
 client.run(TOKEN)
