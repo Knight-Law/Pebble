@@ -8,6 +8,7 @@ import sys
 import urllib.request
 import discord
 import psycopg2
+import re
 from discord import Game
 from discord.ext.commands import Bot
 from config import config
@@ -64,10 +65,15 @@ def initilizeBot():
         user = cur.fetchall()
         if not user:
             print("User does exist in database")
+            #cur.execute('INSERT INTO users VALUES (\'122867560210235392\',\'Jen\',true, false, false, true, \'Happy Birthday\',\':JensCake:662156604270968843\')')
+            cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\')'.format('\''+message.author.id+'\'','\''+message.author.name+'\''))
+            conn.commit()
+            conn.close()
             return
+
         if (user[0][4]==True):
             await client.send_message(channel,user[0][6])
-        if (user[0][5]==False):
+        if (user[0][5]==True):
             await client.add_reaction(message,user[0][7])
         conn.close()
         return
@@ -149,6 +155,111 @@ def initilizeBot():
         embed = discord.Embed(title="Nao Server Status", color=0x00ff00)
         embed.add_field(name="Channels", value=combine, inline=False)
         await client.say(embed=embed)
+
+    @client.command(name='mt',
+                    description="TBD",
+                    brief="TBD",
+                    pass_context=True)
+    async def messageToggle(context, target):
+        #channel = context.channel
+        if (target == None):
+            return
+        m = re.search('<@!(.+?)>', target)
+        if m:
+            userID = m.group(1)
+    
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
+        user = cur.fetchall()
+        if (user[0][4]==True):  #messageToggle
+            cur.execute('UPDATE users SET "messageToggle"= false WHERE "userID"={}'.format('\''+userID+'\''))
+            conn.commit()
+            await client.say("Message disabled for{}".format(target))
+        elif (user[0][4]==False):  #messageToggle
+            cur.execute('UPDATE users SET "messageToggle"= true WHERE "userID"={}'.format('\''+userID+'\''))
+            conn.commit()
+            await client.say("Message enabled for{}".format(target))
+        conn.close()
+        return
+
+    @client.command(name='rt',
+                    description="TBD",
+                    brief="TBD",
+                    pass_context=True)
+    async def reactToggle(context, target):
+        #channel = context.channel
+        if (target == None):
+            return
+        m = re.search('<@!(.+?)>', target)
+        if m:
+            userID = m.group(1)
+    
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
+        user = cur.fetchall()
+        if (user[0][5]==True):  #reactToggle
+            cur.execute('UPDATE users SET "reactToggle"= false WHERE "userID"={}'.format('\''+userID+'\''))
+            conn.commit()
+            await client.say("Reaction disabled for{}".format(target))
+        elif (user[0][5]==False):  #reactToggle
+            cur.execute('UPDATE users SET "reactToggle"= true WHERE "userID"={}'.format('\''+userID+'\''))
+            conn.commit()
+            await client.say("Reaction enabled for{} ".format(target))
+        return
+        
+    @client.command(name='cm',
+                    description="TBD",
+                    brief="TBD",
+                    pass_context=True)
+    async def changeMessage(context, target, message):
+        #channel = context.channel
+        if (target == None):
+            return
+        m = re.search('<@!(.+?)>', target)
+        if m:
+            userID = m.group(1)
+    
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
+        user = cur.fetchall()
+
+        cur.execute('UPDATE users SET "message"= {} WHERE "userID"={}'.format('\''+message+'\'','\''+userID+'\''))
+        conn.commit()
+        await client.say("Message updated for{}".format(target))
+        return
+    
+
+    
+    @client.command(name='cr',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+    async def changeReaction(context, target, message):
+        #channel = context.channel
+        if (target == None):
+            return
+        m = re.search('<@!(.+?)>', target)
+        if m:
+            userID = m.group(1)
+        m = re.search('<(.+?)>', message)
+        if m:
+            emoji = m.group(1)
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
+        user = cur.fetchall()
+
+        cur.execute('UPDATE users SET "reaction"= {} WHERE "userID"={}'.format('\''+emoji+'\'','\''+userID+'\''))
+        conn.commit()
+        await client.say("Reaction updated for{}".format(target))
+        return
+
+#UPDATE users
+#SET name = 'Test'
+#WHERE name = 'test'
 
 
     @client.command(name='exit',
