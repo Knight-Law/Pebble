@@ -86,32 +86,38 @@ def initilizeBot():
         
 
     #Command to suggest a random game from a list
-    #Move list to a table later
     @client.command(name='playwhat',
                     description="TBD",
                     brief="TBD",
                     pass_context=True)
     async def whatGame(context):
-        possible_responses = [
-            'Risk of Rain 2',
-            'League of Legends',
-            'Smash',
-            'Draw Something',
-            'MHW',
-            'Wizard of Legends',
-            'Terraria',
-            'Minecraft',
-            'Stardew Valley',
-            'Outward',
-            'Brawlhalla',
-            'Mabinogi',
-            'Pokemon',
-            'Dont Starve Together',
-            'Monaco',
-            'Left 4 Dead',
-            'Buy a new game on steam',
-        ]
-        await client.say(random.choice(possible_responses))
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT "name" FROM games')
+        user = cur.fetchall()
+        #await client.say(re.search('\'(.+?)\'',str(random.choice(user))))
+        m = re.search('\'(.+?)\'',str(random.choice(user)))
+        if m:
+           found = m.group(1)
+        await client.say(found)
+
+    @client.command(name='ng',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+    async def newGame(context, message):
+        if (message == None):
+            return
+
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('INSERT INTO games ("name") VALUES (\'{}\')'.format(message))
+        conn.commit()
+        await client.say('{} has been added to the list'.format(message))
+        return
+
+
+
     #showcases the current server status of Mabinogi's Nao server using an API
     @client.command(name='naoStatus',
                     description="TBD",
@@ -161,7 +167,6 @@ def initilizeBot():
                     brief="TBD",
                     pass_context=True)
     async def messageToggle(context, target):
-        #channel = context.channel
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -182,13 +187,12 @@ def initilizeBot():
             await client.say("Message enabled for{}".format(target))
         conn.close()
         return
-
+    
     @client.command(name='rt',
                     description="TBD",
                     brief="TBD",
                     pass_context=True)
     async def reactToggle(context, target):
-        #channel = context.channel
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -214,7 +218,6 @@ def initilizeBot():
                     brief="TBD",
                     pass_context=True)
     async def changeMessage(context, target, message):
-        #channel = context.channel
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -238,7 +241,6 @@ def initilizeBot():
                 brief="TBD",
                 pass_context=True)
     async def changeReaction(context, target, message):
-        #channel = context.channel
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -257,10 +259,43 @@ def initilizeBot():
         await client.say("Reaction updated for{}".format(target))
         return
 
-#UPDATE users
-#SET name = 'Test'
-#WHERE name = 'test'
+    @client.command(name='gm',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+    async def getMessage(context, target):
+        if (target == None):
+            return
+        m = re.search('<@!(.+?)>', target)
+        if m:
+            userID = m.group(1)
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
+        user = cur.fetchall()
+        await client.say("Message for{} is {}".format(target,user[0][6]))
+        return
 
+    
+    @client.command(name='gr',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+    async def getReaction(context, target):
+        if (target == None):
+            return
+        m = re.search('<@!(.+?)>', target)
+        if m:
+            userID = m.group(1)
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
+        user = cur.fetchall()
+        await client.say("Reaction for{} is <{}>".format(target,user[0][7]))
+        return
+
+    
+    
 
     @client.command(name='exit',
                     description="TBD",
