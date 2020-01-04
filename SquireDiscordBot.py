@@ -95,7 +95,6 @@ def initilizeBot():
         cur = conn.cursor()
         cur.execute('SELECT "name" FROM games')
         user = cur.fetchall()
-        #await client.say(re.search('\'(.+?)\'',str(random.choice(user))))
         m = re.search('\'(.+?)\'',str(random.choice(user)))
         if m:
            found = m.group(1)
@@ -116,7 +115,23 @@ def initilizeBot():
         await client.say('{} has been added to the list'.format(message))
         return
 
-
+    @client.command(name='ag',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+    async def allGames(context):
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT * from games')
+        games = cur.fetchall()
+        gameOutput = ""
+        for i in range (len(games)):
+            gameOutput += (games[i][1]+'\n')
+        await client.say(gameOutput)
+        #embed = discord.Embed(title="List of Games", color=0x00ff00)
+        #embed.add_field(name=" ", value=gameOutput, inline=False)
+        #await client.say(embed=embed)
+        return
 
     #showcases the current server status of Mabinogi's Nao server using an API
     @client.command(name='naoStatus',
