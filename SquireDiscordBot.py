@@ -13,6 +13,7 @@ from discord import Game
 from discord.ext.commands import Bot
 from config import config
 
+
 def testConnect():
     conn = None
     try:
@@ -52,6 +53,7 @@ def initilizeBot():
     BOT_PREFIX = (".")
     client = Bot(command_prefix=BOT_PREFIX)
 
+    #Bot will give a reaction or message depending on the userID paramters
     @client.event
     async def on_message(message):
         cur, conn = getConnect()
@@ -84,8 +86,22 @@ def initilizeBot():
         #await client.add_reaction(message,':yikes:589332576909525012')
         #await client.add_reaction(message,'a:hc:659191821506838528')
         
+    #Grabs a random response 
+    @client.command(name='8ball',
+                    description="TBD",
+                    brief="TBD",
+                    pass_context=True)
+    async def ballresponse(context):
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute('SELECT "response" FROM answers')
+        user = cur.fetchall()
+        m = re.search('\'(.+?)\'',str(random.choice(user)))
+        if m:
+           found = m.group(1)
+        await client.say(found)
 
-    #Command to suggest a random game from a list
+    #Suggest a random game
     @client.command(name='playwhat',
                     description="TBD",
                     brief="TBD",
@@ -95,11 +111,13 @@ def initilizeBot():
         cur = conn.cursor()
         cur.execute('SELECT "name" FROM games')
         user = cur.fetchall()
+        conn.close()
         m = re.search('\'(.+?)\'',str(random.choice(user)))
         if m:
            found = m.group(1)
         await client.say(found)
 
+    #Adds a new game to the list
     @client.command(name='ng',
                 description="TBD",
                 brief="TBD",
@@ -112,9 +130,11 @@ def initilizeBot():
         cur = conn.cursor()
         cur.execute('INSERT INTO games ("name") VALUES (\'{}\')'.format(message))
         conn.commit()
+        conn.close()
         await client.say('{} has been added to the list'.format(message))
         return
 
+    #Outputs all the games 
     @client.command(name='ag',
                 description="TBD",
                 brief="TBD",
@@ -124,16 +144,18 @@ def initilizeBot():
         cur = conn.cursor()
         cur.execute('SELECT * from games')
         games = cur.fetchall()
+        conn.close()
         gameOutput = ""
+        games.sort(key = lambda x: x[1])
         for i in range (len(games)):
-            gameOutput += (games[i][1]+'\n')
+            gameOutput += ('[{}] '.format(i+1)+games[i][1]+'\n')
         await client.say(gameOutput)
         #embed = discord.Embed(title="List of Games", color=0x00ff00)
         #embed.add_field(name=" ", value=gameOutput, inline=False)
         #await client.say(embed=embed)
         return
 
-    #showcases the current server status of Mabinogi's Nao server using an API
+    #Access 3rd Party API for Mabinogi's server Nao
     @client.command(name='naoStatus',
                     description="TBD",
                     brief="TBD",
@@ -146,7 +168,7 @@ def initilizeBot():
         size = (len(data['game']['servers'][0]['channels']))
         for i in range (size):
             total.append(json.dumps(data['game']['servers'][0]['channels'][i]['name'] ) + " : " + json.dumps(data['game']['servers'][0]['channels'][i]['stress']) + '%')
-    #---------------
+    #------Temp Sorting Solution---------
         hold = '' 
         for i in range(0, len(total)): 
             if(total[i].startswith('"Ch')): 
@@ -172,11 +194,12 @@ def initilizeBot():
         a.append(hold) 
         for i in range (size):
             combine += a[i] +'\n'
-    #----------------
+    #---------------------
         embed = discord.Embed(title="Nao Server Status", color=0x00ff00)
         embed.add_field(name="Channels", value=combine, inline=False)
         await client.say(embed=embed)
 
+    #Flips the message parameter to True/False
     @client.command(name='mt',
                     description="TBD",
                     brief="TBD",
@@ -202,7 +225,7 @@ def initilizeBot():
             await client.say("Message enabled for{}".format(target))
         conn.close()
         return
-    
+    #Flips the react parameter to True/False
     @client.command(name='rt',
                     description="TBD",
                     brief="TBD",
@@ -221,13 +244,16 @@ def initilizeBot():
         if (user[0][5]==True):  #reactToggle
             cur.execute('UPDATE users SET "reactToggle"= false WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
+            conn.close()
             await client.say("Reaction disabled for{}".format(target))
         elif (user[0][5]==False):  #reactToggle
             cur.execute('UPDATE users SET "reactToggle"= true WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
+            conn.close()
             await client.say("Reaction enabled for{} ".format(target))
         return
-        
+    
+    #Changes the message of the targeted user
     @client.command(name='cm',
                     description="TBD",
                     brief="TBD",
@@ -246,11 +272,11 @@ def initilizeBot():
 
         cur.execute('UPDATE users SET "message"= {} WHERE "userID"={}'.format('\''+message+'\'','\''+userID+'\''))
         conn.commit()
+        conn.close()
         await client.say("Message updated for{}".format(target))
         return
     
-
-    
+    #Changes the reaction of the targeted user
     @client.command(name='cr',
                 description="TBD",
                 brief="TBD",
@@ -268,12 +294,13 @@ def initilizeBot():
         cur = conn.cursor()
         cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
         user = cur.fetchall()
-
         cur.execute('UPDATE users SET "reaction"= {} WHERE "userID"={}'.format('\''+emoji+'\'','\''+userID+'\''))
         conn.commit()
+        conn.close()
         await client.say("Reaction updated for{}".format(target))
         return
 
+    #Gets the current message of the targeted user
     @client.command(name='gm',
                 description="TBD",
                 brief="TBD",
@@ -288,10 +315,11 @@ def initilizeBot():
         cur = conn.cursor()
         cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
         user = cur.fetchall()
+        conn.close()
         await client.say("Message for{} is {}".format(target,user[0][6]))
         return
 
-    
+    #Gets the current reaction of the targeted user
     @client.command(name='gr',
                 description="TBD",
                 brief="TBD",
@@ -306,12 +334,11 @@ def initilizeBot():
         cur = conn.cursor()
         cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
         user = cur.fetchall()
+        conn.close()
         await client.say("Reaction for{} is <{}>".format(target,user[0][7]))
         return
 
-    
-    
-
+    #Exit
     @client.command(name='exit',
                     description="TBD",
                     brief="TBD",
@@ -323,7 +350,6 @@ def initilizeBot():
     client.run(TOKEN)
 
 
- 
 if __name__ == '__main__':
     testConnect()
     initilizeBot()
