@@ -74,7 +74,8 @@ def initilizeBot():
             return
 
         if (user[0][4]==True):
-            await client.send_message(channel,user[0][6])
+            embed = discord.Embed(title=user[0][6], color=0xDBC4C4)
+            await client.send_message(channel,embed=embed)
         if (user[0][5]==True):
             await client.add_reaction(message,user[0][7])
         conn.close()
@@ -99,7 +100,9 @@ def initilizeBot():
         m = re.search('\'(.+?)\'',str(random.choice(user)))
         if m:
            found = m.group(1)
-        await client.say(found)
+        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+        embed.add_field(name="\u200b", value=found, inline=False)
+        await client.say(embed=embed)
 
     #Suggest a random game
     @client.command(name='playwhat',
@@ -115,7 +118,9 @@ def initilizeBot():
         m = re.search('\'(.+?)\'',str(random.choice(user)))
         if m:
            found = m.group(1)
-        await client.say(found)
+        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+        embed.add_field(name="\u200b", value=found, inline=False)
+        await client.say(embed=embed)
 
     #Adds a new game to the list
     @client.command(name='ng',
@@ -131,7 +136,9 @@ def initilizeBot():
         cur.execute('INSERT INTO games ("name") VALUES (\'{}\')'.format(message))
         conn.commit()
         conn.close()
-        await client.say('{} has been added to the list'.format(message))
+        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+        embed.add_field(name="\u200b", value='{} has been added to the list'.format(message), inline=False)
+        await client.say(embed=embed)
         return
 
     #Outputs all the games 
@@ -149,10 +156,10 @@ def initilizeBot():
         games.sort(key = lambda x: x[1])
         for i in range (len(games)):
             gameOutput += ('[{}] '.format(i+1)+games[i][1]+'\n')
-        await client.say(gameOutput)
-        #embed = discord.Embed(title="List of Games", color=0x00ff00)
-        #embed.add_field(name=" ", value=gameOutput, inline=False)
-        #await client.say(embed=embed)
+        #await client.say(gameOutput)
+        embed = discord.Embed(title="All the games", color=0x00ff00)
+        embed.add_field(name="---------", value=gameOutput, inline=False)
+        await client.say(embed=embed)
         return
 
     #Access 3rd Party API for Mabinogi's server Nao
@@ -195,7 +202,7 @@ def initilizeBot():
         for i in range (size):
             combine += a[i] +'\n'
     #---------------------
-        embed = discord.Embed(title="Nao Server Status", color=0x00ff00)
+        embed = discord.Embed(title="Nao Server Status", color=0xDBC4C4)
         embed.add_field(name="Channels", value=combine, inline=False)
         await client.say(embed=embed)
 
@@ -218,11 +225,17 @@ def initilizeBot():
         if (user[0][4]==True):  #messageToggle
             cur.execute('UPDATE users SET "messageToggle"= false WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
-            await client.say("Message disabled for{}".format(target))
+            embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+            embed.add_field(name="\u200b", value="Message disabled for {}".format(target), inline=False)
+            await client.say(embed=embed)
+            #await client.say("Message disabled for{}".format(target))
         elif (user[0][4]==False):  #messageToggle
             cur.execute('UPDATE users SET "messageToggle"= true WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
-            await client.say("Message enabled for{}".format(target))
+            embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+            embed.add_field(name="\u200b", value="Message enabled for {}".format(target), inline=False)
+            await client.say(embed=embed)
+            #await client.say("Message enabled for{}".format(target))
         conn.close()
         return
     #Flips the react parameter to True/False
@@ -245,12 +258,16 @@ def initilizeBot():
             cur.execute('UPDATE users SET "reactToggle"= false WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
             conn.close()
-            await client.say("Reaction disabled for{}".format(target))
+            embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+            embed.add_field(name="\u200b", value="Reaction disabled for {}".format(target), inline=False)
+            await client.say(embed=embed)
         elif (user[0][5]==False):  #reactToggle
             cur.execute('UPDATE users SET "reactToggle"= true WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
             conn.close()
-            await client.say("Reaction enabled for{} ".format(target))
+            embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+            embed.add_field(name="\u200b", value="Reaction enabled for {}".format(target), inline=False)
+            await client.say(embed=embed)
         return
     
     #Changes the message of the targeted user
@@ -273,7 +290,9 @@ def initilizeBot():
         cur.execute('UPDATE users SET "message"= {} WHERE "userID"={}'.format('\''+message+'\'','\''+userID+'\''))
         conn.commit()
         conn.close()
-        await client.say("Message updated for{}".format(target))
+        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+        embed.add_field(name="\u200b", value="Message updated for {}".format(target), inline=False)
+        await client.say(embed=embed)
         return
     
     #Changes the reaction of the targeted user
@@ -297,7 +316,9 @@ def initilizeBot():
         cur.execute('UPDATE users SET "reaction"= {} WHERE "userID"={}'.format('\''+emoji+'\'','\''+userID+'\''))
         conn.commit()
         conn.close()
-        await client.say("Reaction updated for{}".format(target))
+        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+        embed.add_field(name="\u200b", value="Reaction updated for {}".format(target), inline=False)
+        await client.say(embed=embed)
         return
 
     #Gets the current message of the targeted user
@@ -316,7 +337,9 @@ def initilizeBot():
         cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
         user = cur.fetchall()
         conn.close()
-        await client.say("Message for{} is {}".format(target,user[0][6]))
+        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+        embed.add_field(name="\u200b", value="Message for {} is {}".format(target,user[0][6]), inline=False)
+        await client.say(embed=embed)
         return
 
     #Gets the current reaction of the targeted user
@@ -335,7 +358,9 @@ def initilizeBot():
         cur.execute('SELECT * FROM users WHERE "userID"={}'.format('\''+userID+'\''))
         user = cur.fetchall()
         conn.close()
-        await client.say("Reaction for{} is <{}>".format(target,user[0][7]))
+        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+        embed.add_field(name="\u200b", value="Reaction for {} is <{}>".format(target,user[0][7]), inline=False)
+        await client.say(embed=embed)
         return
 
     #Exit
