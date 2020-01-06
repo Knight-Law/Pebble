@@ -238,6 +238,7 @@ def initilizeBot():
             #await client.say("Message enabled for{}".format(target))
         conn.close()
         return
+        
     #Flips the react parameter to True/False
     @client.command(name='rt',
                     description="TBD",
