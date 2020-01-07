@@ -67,7 +67,6 @@ def initilizeBot():
         user = cur.fetchall()
         if not user:
             print("User does exist in database")
-            #cur.execute('INSERT INTO users VALUES (\'122867560210235392\',\'Jen\',true, false, false, true, \'Happy Birthday\',\':JensCake:662156604270968843\')')
             cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\')'.format('\''+message.author.id+'\'','\''+message.author.name+'\''))
             conn.commit()
             conn.close()
@@ -156,9 +155,18 @@ def initilizeBot():
         games.sort(key = lambda x: x[1])
         for i in range (len(games)):
             gameOutput += ('[{}] '.format(i+1)+games[i][1]+'\n')
-        #await client.say(gameOutput)
-        embed = discord.Embed(title="All the games", color=0x00ff00)
+        embed = discord.Embed(title="All the games", color=0xDBC4C4)
         embed.add_field(name="---------", value=gameOutput, inline=False)
+        await client.say(embed=embed)
+        return
+
+    #Showcase
+    @client.command(name='color',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+    async def printColor(context,hue):
+        embed = discord.Embed(title="<-------", color=int('0x'+hue, 0))
         await client.say(embed=embed)
         return
 
@@ -228,14 +236,12 @@ def initilizeBot():
             embed = discord.Embed(title="\u200b", color=0xDBC4C4)
             embed.add_field(name="\u200b", value="Message disabled for {}".format(target), inline=False)
             await client.say(embed=embed)
-            #await client.say("Message disabled for{}".format(target))
         elif (user[0][4]==False):  #messageToggle
             cur.execute('UPDATE users SET "messageToggle"= true WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
             embed = discord.Embed(title="\u200b", color=0xDBC4C4)
             embed.add_field(name="\u200b", value="Message enabled for {}".format(target), inline=False)
             await client.say(embed=embed)
-            #await client.say("Message enabled for{}".format(target))
         conn.close()
         return
         
