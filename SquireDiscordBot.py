@@ -12,6 +12,7 @@ import re
 from discord import Game
 from discord.ext.commands import Bot
 from config import config
+from PIL import Image, ImageColor
 
 
 def testConnect():
@@ -66,17 +67,18 @@ def initilizeBot():
         cur.execute('SELECT * FROM users WHERE "userID"=\'{}\''.format(message.author.id))
         user = cur.fetchall()
         if not user:
-            print("User does exist in database")
-            cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\')'.format('\''+message.author.id+'\'','\''+message.author.name+'\''))
+            print("{} has been aded to the database".format(message.author.name))
+            cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\')'.format('\''+str(message.author.id)+'\'','\''+message.author.name+'\''))
+            #cur.execute('INSERT INTO users VALUES (\'None\',\'None\',false, false, false, false, \'None\',\':JensCake:662156604270968843\')')
             conn.commit()
             conn.close()
             return
 
         if (user[0][4]==True):
             embed = discord.Embed(title=user[0][6], color=0xDBC4C4)
-            await client.send_message(channel,embed=embed)
+            await message.channel.send(embed=embed)
         if (user[0][5]==True):
-            await client.add_reaction(message,user[0][7])
+            await message.add_reaction(user[0][7])
         conn.close()
         return
 
@@ -99,9 +101,10 @@ def initilizeBot():
         m = re.search('\'(.+?)\'',str(random.choice(user)))
         if m:
            found = m.group(1)
-        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
-        embed.add_field(name="\u200b", value=found, inline=False)
-        await client.say(embed=embed)
+        #embed = discord.Embed(title="\u200b", color=0xDBC4C4)
+        #embed.add_field(name="\u200b", value=found, inline=False)
+        #await context.send(embed=embed)
+        await context.send("```{}```".format(found))
 
     #Suggest a random game
     @client.command(name='playwhat',
@@ -119,7 +122,7 @@ def initilizeBot():
            found = m.group(1)
         embed = discord.Embed(title="\u200b", color=0xDBC4C4)
         embed.add_field(name="\u200b", value=found, inline=False)
-        await client.say(embed=embed)
+        await context.send(embed=embed)
 
     #Adds a new game to the list
     @client.command(name='ng',
@@ -137,7 +140,7 @@ def initilizeBot():
         conn.close()
         embed = discord.Embed(title="\u200b", color=0xDBC4C4)
         embed.add_field(name="\u200b", value='{} has been added to the list'.format(message), inline=False)
-        await client.say(embed=embed)
+        await context.send(embed=embed)
         return
 
     #Outputs all the games 
@@ -157,7 +160,7 @@ def initilizeBot():
             gameOutput += ('[{}] '.format(i+1)+games[i][1]+'\n')
         embed = discord.Embed(title="All the games", color=0xDBC4C4)
         embed.add_field(name="---------", value=gameOutput, inline=False)
-        await client.say(embed=embed)
+        await context.send(embed=embed)
         return
 
     #Showcase
@@ -166,8 +169,9 @@ def initilizeBot():
                 brief="TBD",
                 pass_context=True)
     async def printColor(context,hue):
-        embed = discord.Embed(title="<-------", color=int('0x'+hue, 0))
-        await client.say(embed=embed)
+        im = Image.new(mode = "RGB", size = (25, 25), color = ('#{}'.format(hue)))
+        pixel = im.save('simplePixel.png') 
+        await context.send(file=discord.File('simplePixel.png'))
         return
 
     #Access 3rd Party API for Mabinogi's server Nao
@@ -212,7 +216,7 @@ def initilizeBot():
     #---------------------
         embed = discord.Embed(title="Nao Server Status", color=0xDBC4C4)
         embed.add_field(name="Channels", value=combine, inline=False)
-        await client.say(embed=embed)
+        await context.send(embed=embed)
 
     #Flips the message parameter to True/False
     @client.command(name='mt',
@@ -235,13 +239,13 @@ def initilizeBot():
             conn.commit()
             embed = discord.Embed(title="\u200b", color=0xDBC4C4)
             embed.add_field(name="\u200b", value="Message disabled for {}".format(target), inline=False)
-            await client.say(embed=embed)
+            await context.send(embed=embed)
         elif (user[0][4]==False):  #messageToggle
             cur.execute('UPDATE users SET "messageToggle"= true WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
             embed = discord.Embed(title="\u200b", color=0xDBC4C4)
             embed.add_field(name="\u200b", value="Message enabled for {}".format(target), inline=False)
-            await client.say(embed=embed)
+            await context.send(embed=embed)
         conn.close()
         return
         
@@ -267,14 +271,14 @@ def initilizeBot():
             conn.close()
             embed = discord.Embed(title="\u200b", color=0xDBC4C4)
             embed.add_field(name="\u200b", value="Reaction disabled for {}".format(target), inline=False)
-            await client.say(embed=embed)
+            await context.send(embed=embed)
         elif (user[0][5]==False):  #reactToggle
             cur.execute('UPDATE users SET "reactToggle"= true WHERE "userID"={}'.format('\''+userID+'\''))
             conn.commit()
             conn.close()
             embed = discord.Embed(title="\u200b", color=0xDBC4C4)
             embed.add_field(name="\u200b", value="Reaction enabled for {}".format(target), inline=False)
-            await client.say(embed=embed)
+            await context.send(embed=embed)
         return
     
     #Changes the message of the targeted user
@@ -299,7 +303,7 @@ def initilizeBot():
         conn.close()
         embed = discord.Embed(title="\u200b", color=0xDBC4C4)
         embed.add_field(name="\u200b", value="Message updated for {}".format(target), inline=False)
-        await client.say(embed=embed)
+        await context.send(embed=embed)
         return
     
     #Changes the reaction of the targeted user
@@ -325,7 +329,7 @@ def initilizeBot():
         conn.close()
         embed = discord.Embed(title="\u200b", color=0xDBC4C4)
         embed.add_field(name="\u200b", value="Reaction updated for {}".format(target), inline=False)
-        await client.say(embed=embed)
+        await context.send(embed=embed)
         return
 
     #Gets the current message of the targeted user
@@ -346,7 +350,7 @@ def initilizeBot():
         conn.close()
         embed = discord.Embed(title="\u200b", color=0xDBC4C4)
         embed.add_field(name="\u200b", value="Message for {} is {}".format(target,user[0][6]), inline=False)
-        await client.say(embed=embed)
+        await context.send(embed=embed)
         return
 
     #Gets the current reaction of the targeted user
@@ -367,7 +371,7 @@ def initilizeBot():
         conn.close()
         embed = discord.Embed(title="\u200b", color=0xDBC4C4)
         embed.add_field(name="\u200b", value="Reaction for {} is <{}>".format(target,user[0][7]), inline=False)
-        await client.say(embed=embed)
+        await context.send(embed=embed)
         return
 
     #Exit
