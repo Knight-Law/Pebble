@@ -374,7 +374,7 @@ def initilizeBot():
         await context.send(embed=embed)
         return
 
-    #Exit
+    #Exit 
     @client.command(name='exit',
                     description="TBD",
                     brief="TBD",
