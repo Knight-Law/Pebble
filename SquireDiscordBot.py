@@ -332,7 +332,7 @@ def initilizeBot():
         await context.send(embed=embed)
         return
 
-    #Gets the current message of the targeted user
+    #Gets the current message of the targeted user 
     @client.command(name='gm',
                 description="TBD",
                 brief="TBD",
