@@ -386,6 +386,7 @@ def initilizeBot():
     client.run(TOKEN)
 
 
+
 if __name__ == '__main__':
     testConnect()
     initilizeBot()
