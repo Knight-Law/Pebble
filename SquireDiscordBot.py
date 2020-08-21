@@ -187,7 +187,7 @@ def initilizeBot():
         size = (len(data['game']['servers'][0]['channels']))
         for i in range (size):
             total.append(json.dumps(data['game']['servers'][0]['channels'][i]['name'] ) + " : " + json.dumps(data['game']['servers'][0]['channels'][i]['stress']) + '%')
-    #------Temp Sorting Solution---------
+    #------Temp Sorting Solution--------- 
         hold = '' 
         for i in range(0, len(total)): 
             if(total[i].startswith('"Ch')): 
