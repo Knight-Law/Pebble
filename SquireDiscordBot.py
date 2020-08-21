@@ -69,7 +69,6 @@ def initilizeBot():
         if not user:
             print("{} has been aded to the database".format(message.author.name))
             cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\')'.format('\''+str(message.author.id)+'\'','\''+message.author.name+'\''))
-            #cur.execute('INSERT INTO users VALUES (\'None\',\'None\',false, false, false, false, \'None\',\':JensCake:662156604270968843\')')
             conn.commit()
             conn.close()
             return
@@ -114,14 +113,17 @@ def initilizeBot():
     async def whatGame(context):
         cur, conn = getConnect()
         cur = conn.cursor()
-        cur.execute('SELECT "name" FROM games')
+        cur.execute('SELECT "name","description","url" FROM games')
         user = cur.fetchall()
         conn.close()
-        m = re.search('\'(.+?)\'',str(random.choice(user)))
+        m = re.findall('\'(.+?)\'',str(random.choice(user)))
         if m:
-           found = m.group(1)
-        embed = discord.Embed(title="\u200b", color=0xDBC4C4)
-        embed.add_field(name="\u200b", value=found, inline=False)
+           nameFound = m[0]
+           descriptionFound = m[1]
+           urlFound = m[2]
+        embed = discord.Embed(title=nameFound,description = descriptionFound,url = urlFound)
+        #embed.add_field(name="\u200b",, inline=False)
+        #embed.add_field(name="\u200b", value=descriptionFound, inline=False)
         await context.send(embed=embed)
 
     #Adds a new game to the list
