@@ -353,7 +353,7 @@ def initilizeBot():
         await context.send(embed=embed)
         return
 
-    #Gets the current reaction of the targeted user
+    #Gets the current reaction of the targeted user  
     @client.command(name='gr',
                 description="TBD",
                 brief="TBD",
