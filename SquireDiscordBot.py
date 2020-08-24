@@ -4,15 +4,18 @@ import aiohttp
 import json
 import requests
 import os
+import time
 import sys
 import urllib.request
 import discord
 import psycopg2
 import re
+import textwrap
+from io import BytesIO
 from discord import Game
 from discord.ext.commands import Bot
 from config import config
-from PIL import Image, ImageColor
+from PIL import Image, ImageColor, ImageDraw, ImageSequence, ImageFont
 
 
 def testConnect():
@@ -64,11 +67,13 @@ def initilizeBot():
             return
 
         channel = message.channel
-        cur.execute('SELECT * FROM users WHERE "userID"=\'{}\''.format(message.author.id))
+        ##print (message.guild.id)
+        #cur.execute('SELECT * FROM users WHERE "userID"=\'{}\''.format(message.author.id))
+        cur.execute('SELECT * FROM users WHERE "userID"=\'{}\'AND"server"=\'{}\''.format(message.author.id,message.guild.id))
         user = cur.fetchall()
         if not user:
             print("{} has been aded to the database".format(message.author.name))
-            cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\')'.format('\''+str(message.author.id)+'\'','\''+message.author.name+'\''))
+            cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\', {})'.format('\''+str(message.author.id)+'\'','\''+message.author.name+'\'','\''+str(message.guild.id)+'\''))
             conn.commit()
             conn.close()
             return
@@ -88,11 +93,13 @@ def initilizeBot():
         #await client.add_reaction(message,'a:hc:659191821506838528')
         
     #Grabs a random response 
-    @client.command(name='8ball',
+    @client.command(name='showme',
                     description="TBD",
                     brief="TBD",
-                    pass_context=True)
+                    pass_context=True,
+                    aliases =['sm'])
     async def ballresponse(context):
+        newMSG = await context.send(file=discord.File('PebbleShatter.gif'))#delete_after = 0.1)
         cur, conn = getConnect()
         cur = conn.cursor()
         cur.execute('SELECT "response" FROM answers')
@@ -103,7 +110,10 @@ def initilizeBot():
         #embed = discord.Embed(title="\u200b", color=0xDBC4C4)
         #embed.add_field(name="\u200b", value=found, inline=False)
         #await context.send(embed=embed)
-        await context.send("```{}```".format(found))
+        time.sleep(3)
+        await newMSG.delete()
+        await context.send("*The Pebble shatters itself to reveal...*\n**{}**".format(found))
+        return
 
     #Suggest a random game
     @client.command(name='playwhat',
@@ -132,9 +142,11 @@ def initilizeBot():
                 brief="TBD",
                 pass_context=True)
     async def newGame(context, message):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this')
+            return
         if (message == None):
             return
-
         cur, conn = getConnect()
         cur = conn.cursor()
         cur.execute('INSERT INTO games ("name") VALUES (\'{}\')'.format(message))
@@ -171,54 +183,74 @@ def initilizeBot():
                 brief="TBD",
                 pass_context=True)
     async def printColor(context,hue):
-        im = Image.new(mode = "RGB", size = (25, 25), color = ('#{}'.format(hue)))
-        pixel = im.save('simplePixel.png') 
-        await context.send(file=discord.File('simplePixel.png'))
+        match = re.search(r'^(?:[0-9a-fA-F]{3}){1,2}$', hue) #Checks for valid hex color code
+        if match:
+            im = Image.new(mode = "RGB", size = (25, 25), color = ('#{}'.format(hue)))
+            pixel = im.save('simplePixel.png') 
+            await context.send(file=discord.File('simplePixel.png'))
+        else:
+            await context.send('Invalid Hex Color Code')
         return
 
-    #Access 3rd Party API for Mabinogi's server Nao
-    @client.command(name='naoStatus',
+    #Overlays a gif over a targetted user's avatar
+    @client.command(name='pet',
+                description="TBD",
+                brief="TBD",
+                pass_context=True)
+    async def printColor(context,target:discord.User):
+        response = requests.get(target.avatar_url)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((50,50))
+
+        gifFrames = 10
+        avatar = Image.new('RGBA',(100,100),(255, 105, 180, 255))
+        avatar.paste (img.convert('RGBA'),(34,21))
+
+        output = []
+
+        for x in range(gifFrames):
+            output.append(avatar.copy())
+            im = Image.open("Hands\\{}.png".format(str(x+1))).convert('RGBA')
+            output[x].paste(im,(0,0), mask = im)
+
+        final = output[0]
+        final.save('out.gif','GIF',save_all=True, append_images= output, optimize=True, duration=70, loop=0, transparency = 0, disposal = 2)
+        await context.send(file=discord.File('out.gif'))
+        return
+
+    #sign
+    @client.command(name='sign',
                     description="TBD",
                     brief="TBD",
                     pass_context=True)
-    async def mabiServerStatus(context):
-        with urllib.request.urlopen("http://mabi.world/mss/status.json") as url:
-            data = json.loads(url.read().decode())
-        total = []
-        combine = ""
-        size = (len(data['game']['servers'][0]['channels']))
-        for i in range (size):
-            total.append(json.dumps(data['game']['servers'][0]['channels'][i]['name'] ) + " : " + json.dumps(data['game']['servers'][0]['channels'][i]['stress']) + '%')
-    #------Temp Sorting Solution--------- 
-        hold = '' 
-        for i in range(0, len(total)): 
-            if(total[i].startswith('"Ch')): 
-                end = total[i].index('"', 1) 
-                start = total[i].index('h', 1) + 1 
-                part = total[i][start:end] 
-                total[i] = total[i].partition(part) 
-            else: 
-                hold = i 
+    async def messageToggle(context, colorChoice, message):
+        if (len(message)>75):
+            await context.send("*Pebble deems your message too long and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
 
-        hold = total.pop(hold) 
+        sign = Image.open("AmongUs\\Sign.png").convert('RGBA')
+        player = Image.open("AmongUs\\{}.png".format(colorChoice)).convert('RGBA')
+        player.paste(sign,(0,0), mask = sign)
 
-        for i in range(0, len(total)): 
-            total[i] = list(total[i]) 
-            total[i][1] = int(total[i][1]) 
+        draw = ImageDraw.Draw(player)
+        font = ImageFont.truetype("arial.ttf", 16)
+        #draw.text((24, 191),message,(0,0,0),font=font)
+        h = 180
+        w = 240 
+        lines = textwrap.wrap(message, width=25)
+        y_text = h
+        for line in lines:
+            width, height = font.getsize(line)
+            draw.text(((w - width) / 2, y_text), line, (0,0,0),font=font)
+            y_text += height
+        
+        player = player.resize ((180,180))
+        player.save('sign.png')
 
-        a = sorted(total, key=lambda x: x[1]) 
-        for i in range(len(a)): 
-            concat = '' 
-            for c in a[i]: 
-                concat += str(c) 
-            a[i] = concat 
-        a.append(hold) 
-        for i in range (size):
-            combine += a[i] +'\n'
-    #---------------------
-        embed = discord.Embed(title="Nao Server Status", color=0xDBC4C4)
-        embed.add_field(name="Channels", value=combine, inline=False)
-        await context.send(embed=embed)
+        await context.send(file=discord.File('sign.png'))
+        return
+
+
 
     #Flips the message parameter to True/False
     @client.command(name='mt',
@@ -226,6 +258,9 @@ def initilizeBot():
                     brief="TBD",
                     pass_context=True)
     async def messageToggle(context, target):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this```')
+            return
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -257,6 +292,9 @@ def initilizeBot():
                     brief="TBD",
                     pass_context=True)
     async def reactToggle(context, target):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this')
+            return
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -289,6 +327,9 @@ def initilizeBot():
                     brief="TBD",
                     pass_context=True)
     async def changeMessage(context, target, message):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this')
+            return
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -314,6 +355,9 @@ def initilizeBot():
                 brief="TBD",
                 pass_context=True)
     async def changeReaction(context, target, message):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this')
+            return
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -340,6 +384,9 @@ def initilizeBot():
                 brief="TBD",
                 pass_context=True)
     async def getMessage(context, target):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this')
+            return
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
@@ -361,6 +408,9 @@ def initilizeBot():
                 brief="TBD",
                 pass_context=True)
     async def getReaction(context, target):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this')
+            return
         if (target == None):
             return
         m = re.search('<@!(.+?)>', target)
