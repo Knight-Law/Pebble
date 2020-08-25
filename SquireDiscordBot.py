@@ -94,8 +94,8 @@ def initilizeBot():
         
     #Grabs a random response 
     @client.command(name='showme',
-                    description="TBD",
-                    brief="TBD",
+                    description="Pebble will answer a question by shattering itself",
+                    brief="Pebble will answer your questions",
                     pass_context=True,
                     aliases =['sm'])
     async def ballresponse(context):
@@ -112,18 +112,33 @@ def initilizeBot():
         #await context.send(embed=embed)
         time.sleep(3)
         await newMSG.delete()
-        await context.send("*The Pebble shatters itself to reveal...*\n**{}**".format(found))
+        await context.send("*Pebble shatters itself to reveal...*\n**{}**".format(found))
         return
 
     #Suggest a random game
     @client.command(name='playwhat',
-                    description="TBD",
-                    brief="TBD",
-                    pass_context=True)
-    async def whatGame(context):
+                    description="Pebble will decide a random game for you",
+                    brief="Pebble will decide a random game for you",
+                    pass_context=True,
+                    aliases =['pw'])
+    async def whatGame(context, gameType):
         cur, conn = getConnect()
         cur = conn.cursor()
-        cur.execute('SELECT "name","description","url" FROM games')
+        
+        # if (gameType[0]=='-'):
+        #     include = "false"
+        # else:
+        #     include = "true"
+        
+        if (gameType == 'tts'):
+            cur.execute('SELECT "name","description","url" FROM games WHERE "TTS" = true')
+        elif (gameType == 'all'):
+            cur.execute('SELECT "name","description","url" FROM games')
+        elif (gameType == '-tts'):
+            cur.execute('SELECT "name","description","url" FROM games WHERE "TTS" = false')
+        else:
+            await context.send("*Pebble deems you have chosen an invalid mode and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
         user = cur.fetchall()
         conn.close()
         m = re.findall('\'(.+?)\'',str(random.choice(user)))
@@ -132,15 +147,14 @@ def initilizeBot():
            descriptionFound = m[1]
            urlFound = m[2]
         embed = discord.Embed(title=nameFound,description = descriptionFound,url = urlFound)
-        #embed.add_field(name="\u200b",, inline=False)
-        #embed.add_field(name="\u200b", value=descriptionFound, inline=False)
         await context.send(embed=embed)
 
     #Adds a new game to the list
-    @client.command(name='ng',
-                description="TBD",
-                brief="TBD",
-                pass_context=True)
+    @client.command(name='newgame',
+                description="Add a new game to Pebble\'s recommended games",
+                brief="Pebble wants a new game",
+                pass_context=True,
+                aliases =['ng'])
     async def newGame(context, message):
         if (not context.message.author.guild_permissions.administrator):
             await context.send ('```You do not have permission to use this')
@@ -158,29 +172,45 @@ def initilizeBot():
         return
 
     #Outputs all the games 
-    @client.command(name='ag',
-                description="TBD",
-                brief="TBD",
-                pass_context=True)
-    async def allGames(context):
+    @client.command(name='allgames',
+                description="Pebble will display all the games it knows.",
+                brief="Pebble will display all the games it knows.",
+                pass_context=True,
+                aliases =['ag'])
+    async def allGames(context, gameType):
         cur, conn = getConnect()
         cur = conn.cursor()
-        cur.execute('SELECT * from games')
+        if (gameType == 'tts'):
+            cur.execute('SELECT * from games WHERE "TTS" = true')
+            embed = discord.Embed(title="All Table Top Simulator Games", color=0xDBC4C4)
+        elif (gameType == 'all'):
+            cur.execute('SELECT * from games')
+            embed = discord.Embed(title="All Games", color=0xDBC4C4)
+        else:
+            await context.send("*Pebble deems you have chosen an invalid mode and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
         games = cur.fetchall()
         conn.close()
         gameOutput = ""
         games.sort(key = lambda x: x[1])
         for i in range (len(games)):
-            gameOutput += ('[{}] '.format(i+1)+games[i][1]+'\n')
-        embed = discord.Embed(title="All the games", color=0xDBC4C4)
-        embed.add_field(name="---------", value=gameOutput, inline=False)
+            gameOutput += ('[{}] '.format(i+1)+games[i][1])
+            if (gameType != 'tts'):
+                if (games[i][4]):
+                    gameOutput += " : *TTS* \n"
+                else:
+                    gameOutput += "\n"
+            else:
+                gameOutput += "\n"
+        #embed = discord.Embed(title="All the games", color=0xDBC4C4)
+        embed.add_field(name="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ", value=gameOutput, inline=False)
         await context.send(embed=embed)
         return
 
     #Showcase
     @client.command(name='color',
-                description="TBD",
-                brief="TBD",
+                description="Pebble will print a color from the hex color code given",
+                brief="Pebble will print a color from the hex color code given",
                 pass_context=True)
     async def printColor(context,hue):
         match = re.search(r'^(?:[0-9a-fA-F]{3}){1,2}$', hue) #Checks for valid hex color code
@@ -194,8 +224,8 @@ def initilizeBot():
 
     #Overlays a gif over a targetted user's avatar
     @client.command(name='pet',
-                description="TBD",
-                brief="TBD",
+                description="Pebble will give a friendly petting to a user of your choice",
+                brief="Pebble gives pets",
                 pass_context=True)
     async def printColor(context,target:discord.User):
         response = requests.get(target.avatar_url)
@@ -220,8 +250,8 @@ def initilizeBot():
 
     #sign
     @client.command(name='sign',
-                    description="TBD",
-                    brief="TBD",
+                    description="Select a color such as red and a message in \"\" ",
+                    brief="Pebble forces an astronaut to hold a sign",
                     pass_context=True)
     async def messageToggle(context, colorChoice, message):
         if (len(message)>75):
@@ -250,13 +280,12 @@ def initilizeBot():
         await context.send(file=discord.File('sign.png'))
         return
 
-
-
     #Flips the message parameter to True/False
-    @client.command(name='mt',
-                    description="TBD",
-                    brief="TBD",
-                    pass_context=True)
+    @client.command(name='messagetoggle',
+                    description="Flips the user\'s toggle for messages",
+                    brief="Pebble flips the user\'s toggle for messages",
+                    pass_context=True,
+                    aliases =['mt'])
     async def messageToggle(context, target):
         if (not context.message.author.guild_permissions.administrator):
             await context.send ('```You do not have permission to use this```')
@@ -287,10 +316,11 @@ def initilizeBot():
         return
         
     #Flips the react parameter to True/False
-    @client.command(name='rt',
-                    description="TBD",
-                    brief="TBD",
-                    pass_context=True)
+    @client.command(name='reactiontoggle',
+                    description="Flips the user\'s toggle for messages reactions",
+                    brief="Pebble flips the user\'s toggle for messages reactions",
+                    pass_context=True,
+                    aliases =['rt'])
     async def reactToggle(context, target):
         if (not context.message.author.guild_permissions.administrator):
             await context.send ('```You do not have permission to use this')
@@ -322,10 +352,11 @@ def initilizeBot():
         return
     
     #Changes the message of the targeted user
-    @client.command(name='cm',
-                    description="TBD",
-                    brief="TBD",
-                    pass_context=True)
+    @client.command(name='changemessage',
+                    description="Change Pebble\'s message of the targeted user",
+                    brief="Pebble wants to change its message",
+                    pass_context=True,
+                    aliases =['cm'])
     async def changeMessage(context, target, message):
         if (not context.message.author.guild_permissions.administrator):
             await context.send ('```You do not have permission to use this')
@@ -350,10 +381,11 @@ def initilizeBot():
         return
     
     #Changes the reaction of the targeted user
-    @client.command(name='cr',
-                description="TBD",
-                brief="TBD",
-                pass_context=True)
+    @client.command(name='changereaction',
+                description="Change Pebble\'s reaction of the targeted user",
+                brief="Pebble wants to change its reaction",
+                pass_context=True,
+                aliases =['cr'])
     async def changeReaction(context, target, message):
         if (not context.message.author.guild_permissions.administrator):
             await context.send ('```You do not have permission to use this')
@@ -379,10 +411,11 @@ def initilizeBot():
         return
 
     #Gets the current message of the targeted user  
-    @client.command(name='gm',
-                description="TBD",
-                brief="TBD",
-                pass_context=True)
+    @client.command(name='getmessage',
+                description="See Pebble\'s message for the user",
+                brief="Pebble will show you the message for the user",
+                pass_context=True,
+                aliases =['gm'])
     async def getMessage(context, target):
         if (not context.message.author.guild_permissions.administrator):
             await context.send ('```You do not have permission to use this')
@@ -403,10 +436,11 @@ def initilizeBot():
         return
 
     #Gets the current reaction of the targeted user  
-    @client.command(name='gr',
-                description="TBD",
-                brief="TBD",
-                pass_context=True)
+    @client.command(name='getreaction',
+                description="See Pebble\'s reaction for the user",
+                brief="Pebble will show you the reaction for the user",
+                pass_context=True,
+                aliases =['gr'])
     async def getReaction(context, target):
         if (not context.message.author.guild_permissions.administrator):
             await context.send ('```You do not have permission to use this')
@@ -428,12 +462,13 @@ def initilizeBot():
 
     #Exit 
     @client.command(name='exit',
-                    description="TBD",
-                    brief="TBD",
+                    description="Pebble goes bye",
+                    brief="Pebble goes bye",
                     pass_context=True)
     async def endProgram(context):
-        client.close()
-        sys.exit()
+        #client.close()
+        #sys.exit()
+        return
 
     client.run(TOKEN)
 
