@@ -12,11 +12,14 @@ import psycopg2
 import re
 import textwrap
 from io import BytesIO
+from datetime import datetime
 from discord import Game
+from discord.ext import tasks
 from discord.ext.commands import Bot
 from config import config
 from PIL import Image, ImageColor, ImageDraw, ImageSequence, ImageFont
 
+gamesList = []
 
 def testConnect():
     conn = None
@@ -57,6 +60,30 @@ def initilizeBot():
     BOT_PREFIX = (".")
     client = Bot(command_prefix=BOT_PREFIX)
 
+    @tasks.loop(seconds=21)
+    async def cleanUp():
+        global gamesList
+        amountDeleted = 0
+        copyList = gamesList.copy()
+        #print (gamesList[0][2][0][1])
+        #print(len(gamesList))
+        i = 0
+        for i in range(len(gamesList)):
+            #print (testList[i][1].time())
+            #print (datetime.now().time())
+            d1 = gamesList[i][1]
+            d2 = datetime.now()
+            d2 = d2-d1
+            #print (d2.total_seconds())
+            if (d2.total_seconds()>20):
+                del copyList[i-amountDeleted]
+        gamesList = copyList.copy()
+        return
+
+    @client.event
+    async def on_ready():
+        cleanUp.start()
+
     #Bot will give a reaction or message depending on the userID paramters
     @client.event
     async def on_message(message):
@@ -67,7 +94,7 @@ def initilizeBot():
             return
 
         channel = message.channel
-        ##print (message.guild.id)
+        #print (message.guild.id)
         #cur.execute('SELECT * FROM users WHERE "userID"=\'{}\''.format(message.author.id))
         cur.execute('SELECT * FROM users WHERE "userID"=\'{}\'AND"server"=\'{}\''.format(message.author.id,message.guild.id))
         user = cur.fetchall()
@@ -129,7 +156,7 @@ def initilizeBot():
         #     include = "false"
         # else:
         #     include = "true"
-        
+
         if (gameType == 'tts'):
             cur.execute('SELECT "name","description","url" FROM games WHERE "TTS" = true')
         elif (gameType == 'all'):
@@ -156,8 +183,10 @@ def initilizeBot():
                 pass_context=True,
                 aliases =['ng'])
     async def newGame(context, message):
+        await context.send ('```Currently disabled```')
+        return
         if (not context.message.author.guild_permissions.administrator):
-            await context.send ('```You do not have permission to use this')
+            await context.send ('```You do not have permission to use this```')
             return
         if (message == None):
             return
@@ -178,6 +207,7 @@ def initilizeBot():
                 pass_context=True,
                 aliases =['ag'])
     async def allGames(context, gameType):
+        global gamesList
         cur, conn = getConnect()
         cur = conn.cursor()
         if (gameType == 'tts'):
@@ -202,11 +232,48 @@ def initilizeBot():
                     gameOutput += "\n"
             else:
                 gameOutput += "\n"
+
+        gameOutput += "**\nUse \'info #\' for more details**"
         #embed = discord.Embed(title="All the games", color=0xDBC4C4)
+        #if context.author.id in gamesList:
+        
+        for i in range (len(gamesList)):
+            if gamesList[i][0] == context.author.id:
+                del gamesList[i]
+                
+        gamesList.append([context.author.id,datetime.now(),games])
         embed.add_field(name="- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ", value=gameOutput, inline=False)
         await context.send(embed=embed)
         return
 
+    @client.command(name='info',
+                        description="Pebble will give you information on a game from the list",
+                        brief="Pebble will give you information on a game from the list",
+                        pass_context=True)
+    async def whatGame(context, number:int):
+        global gamesList
+        hasIt = False
+        for i in range (len(gamesList)):
+            if gamesList[i][0] == context.author.id:
+                gameList = gamesList[i][2]
+                hasIt = True
+
+        if (not hasIt):
+            await context.send("*Pebble sees you have no recent list and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
+        
+
+        total = len(gameList)
+        if (number>total or number<1):
+            await context.send("*Pebble deems your choice invalid and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
+        number -= 1
+        nameFound = gameList[number][1]
+        descriptionFound = gameList[number][2]
+        urlFound = gameList[number][3]
+
+        embed = discord.Embed(title=nameFound,description = descriptionFound,url = urlFound)
+        await context.send(embed=embed)
     #Showcase
     @client.command(name='color',
                 description="Pebble will print a color from the hex color code given",
@@ -250,8 +317,8 @@ def initilizeBot():
 
     #sign
     @client.command(name='sign',
-                    description="Select a color such as red and a message in \"\" ",
-                    brief="Pebble forces an astronaut to hold a sign",
+                    description="Select a character and a message in \"\" ",
+                    brief="Pebble forces a character to hold a sign",
                     pass_context=True)
     async def messageToggle(context, colorChoice, message):
         if (len(message)>75):
@@ -260,6 +327,7 @@ def initilizeBot():
 
         sign = Image.open("AmongUs\\Sign.png").convert('RGBA')
         player = Image.open("AmongUs\\{}.png".format(colorChoice)).convert('RGBA')
+        player = player.resize ((256,256))
         player.paste(sign,(0,0), mask = sign)
 
         draw = ImageDraw.Draw(player)
