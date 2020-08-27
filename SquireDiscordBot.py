@@ -31,7 +31,7 @@ def testConnect():
         print(cur.rowcount)
         row = cur.fetchone()
         while row is not None:
-            print(row)
+            #print(row)
             row = cur.fetchone()
         cur.close()
     except (Exception, psycopg2.DatabaseError) as error:
@@ -118,7 +118,44 @@ def initilizeBot():
         #await client.send_message(channel,"I support breast cancer")
         #await client.add_reaction(message,':yikes:589332576909525012')
         #await client.add_reaction(message,'a:hc:659191821506838528')
+
+    @client.command(name='soulmate',
+                    description="Pebble will see the compatibility between two people",
+                    brief="Pebble will see the compatibility between two people",
+                    pass_context=True)
+    async def soulMate(context, target1:discord.User, target2:discord.User):
+        random.seed(target1.id+target2.id)
+        result = random.randint(0,10)
+        heartString = ""
+        description = ""
+        for i in range(result):
+            heartString += '❤️'
+        for i in range(10-result):
+            heartString += '🖤'
+
+
+        if (result == 0):
+            description = "Pebble deems your souls aren\'t meant to spend even a second much less eternity together"
+        elif (result >= 1 and result <=2):
+            description = "Pebble sees no love between you two "
+        elif (result >= 3 and result <=4):
+            description = "Pebble knows the love you feel is brief"    
+        elif (result >= 5 and result <=7):
+            description = "Pebble sees you are fond of each other, but unsure if the love will last"
+        elif (result >= 8 and result <=9):
+            description = "Pebble knows your love is true and will last"
+        elif (result == 10):
+            description = "Pebble sees you were created in the beginning to spend eternity with each other"
         
+        #await context.send(heartString)
+        embed = discord.Embed(title=heartString,description = " ")
+        embed.add_field(name="Soulmate Results", value="{}".format(description), inline=False)
+        await context.send(embed=embed)
+        return
+
+
+
+
     #Grabs a random response 
     @client.command(name='showme',
                     description="Pebble will answer a question by shattering itself",
@@ -314,6 +351,82 @@ def initilizeBot():
         final.save('out.gif','GIF',save_all=True, append_images= output, optimize=True, duration=70, loop=0, transparency = 0, disposal = 2)
         await context.send(file=discord.File('out.gif'))
         return
+
+    #Overlays a gif over a targetted user's avatar
+    @client.command(name='flatten',
+                description="Pebble will sit on a person of your choice",
+                brief="Pebble will sit",
+                pass_context=True)
+    async def flatten(context,target:discord.User):
+        response = requests.get(target.avatar_url)
+
+        #random.seed(target.id)
+        result = random.randint(1,4)
+
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((256,50))
+
+        sign = Image.open("PebbleOptions\\{}.png".format(str(result))).convert('RGBA')
+        avatar = img.copy().convert('RGBA')
+        avatar.paste(sign,(0,0), mask = sign)
+
+        output = Image.new('RGBA',(256,256),(0, 0, 0, 0))
+        output.paste(avatar,(0,226), mask = avatar)
+        output.paste(sign,(0,0), mask = sign)
+        output = output.resize ((180,180))
+        output.save('squashed.png')
+        
+        await context.send("*Pebble sits on {}*".format(target.name))
+        await context.send(file=discord.File('squashed.png'))
+        return
+
+    #Overlays a gif over a targetted user's avatar
+    @client.command(name='resize',
+                description="Pebble will take an image of your choice and resize it",
+                brief="Pebble will take an image of your choice and resize its",
+                pass_context=True)
+    async def resize(context,imageType, imageUrl, width, height):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this```')
+            return
+        size = (int(width),int(height))
+        if (size[0] > 300 or size[1] > 300):
+            await context.send("*Pebble deems resolution is too big and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
+
+        response = requests.get(imageUrl)
+        img = Image.open(BytesIO(response.content))
+        
+
+        #print(Image.MIME[img.format])
+        #final.save('out.gif','GIF',save_all=True, append_images= output, optimize=True, duration=70, loop=0, transparency = 0, disposal = 2)
+        if (imageType == 'png'):
+            img = img.resize(size)
+            img.save('resize.{}'.format('png'))
+            await context.send(file=discord.File('resize.{}'.format('png')))
+        elif (imageType == 'gif'):
+            # Get sequence iterator
+            frames = ImageSequence.Iterator(img)
+
+            # Wrap on-the-fly thumbnail generator
+            def thumbnails(frames):
+                for frame in frames:
+                    thumbnail = frame.copy()
+                    thumbnail.thumbnail(size)
+                    yield thumbnail
+
+            frames = thumbnails(frames)
+
+            # Save output
+            om = next(frames) # Handle first frame separately
+            om.info = img.info # Copy sequence info
+            om.save("resize.gif", save_all=True, append_images=list(frames), loop = 0)         
+            await context.send(file=discord.File('resize.{}'.format('gif')))   
+        else:
+            await context.send("*Pebble deems your image type invalid and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
+        return
+    
 
     #sign
     @client.command(name='sign',
