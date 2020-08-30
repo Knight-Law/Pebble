@@ -10,6 +10,7 @@ import urllib.request
 import discord
 import psycopg2
 import re
+import math
 import textwrap
 from io import BytesIO
 from datetime import datetime
@@ -153,6 +154,103 @@ def initilizeBot():
         await context.send(embed=embed)
         return
 
+    @client.command(name='allchannels',
+                    description="Pebble goes bye",
+                    brief="Pebble goes bye",
+                    pass_context=True,
+                    aliases =['ac'])
+    async def allchannels(context, type):
+        #test = context.message.author.guild.channels[1].type
+        #print (test)
+
+        if (type != "text" and type != "voice"):
+            await context.send("*Pebble deems your mode choice invalid and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
+
+        voiceChanneList = []
+        for i in context.message.author.guild.channels:
+            if (i.type.name == type):
+                voiceChanneList.append((i.id,i.type.name,i.name,i.members))
+            #print (i.type)
+        #print(voiceChanneList)
+        if (type == 'voice'):
+            output = '**#. Name : ID : People in Call**\n'
+        elif (type == 'text'):
+            output = '**#. Name : ID : People with Accessed**\n'
+
+        for i in range(len(voiceChanneList)):
+            output += "{}. {} : {} : {}\n".format(i+1,voiceChanneList[i][2],voiceChanneList[i][0],len(voiceChanneList[i][3]))
+            #output += "{:<3}{:-^30}{:-18}{:-^3}\n".format(str(i+1)+'.',voiceChanneList[i][2],voiceChanneList[i][0],len(voiceChanneList[i][3]))
+        cycles = None
+        if (len(output)>2000):
+            cycles = math.ceil(len(output)/2000) 
+            for i in range (cycles):
+                await context.send(output[0+(i*2000):1999+(i*2000)])
+                #await context.send(output[0:1999])
+                #print (5)
+        else:
+            await context.send(output)
+        return
+
+    #async def select(context,voice: discord.VoiceChannel, teams, members):
+    #Showcase
+    @client.command(name='select',
+                description="Pebble will print a color from the hex color code given",
+                brief="Pebble will print a color from the hex color code given",
+                pass_context=True)
+    async def select(context,voiceID, teams, members):
+        #Get all server voice channels and select voice to the discord voice channel that matches the id to simplify call
+        voice = None
+        for i in context.message.author.guild.channels:
+            if (i.id == int(voiceID)):
+                voice = i
+        if voice == None:
+            await context.send("*Pebble deems the channel id invalid and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
+        
+        voiceList = voice.members
+        memberList = []
+        teamList = []
+        output = ''
+        #voiceList:discord.VoiceChannel = '<#542558448194289666>'
+        for i in range(len(voiceList)):
+            #print (voiceList[i].name)
+            memberList.append(voiceList[i].name)
+        chosenOne = ""
+        # for i in range(int(teams)):
+        #     output += '**Team {}**\n'.format(str(i+1))
+        #     if (len(memberList)==0):
+        #         break
+        #     for j in range(int(members)):
+                # chosenOne = random.choice(memberList)
+                # output += '{}\n'.format(chosenOne)
+                # memberList.remove(chosenOne)
+                # if (len(memberList)==0):
+                #     break
+
+        # CREATE EDGE CASE FOR 1  TEAM
+        for i in range(int(teams)):
+            teamList.append([])
+
+        for i in range(int(members)):
+            for j in range(int(teams)):
+                if (len(memberList)==0):
+                    chosenOne ="*Empty*"
+                else:
+                    chosenOne = random.choice(memberList)
+                    memberList.remove(chosenOne)
+                teamList[j].append(chosenOne+'\n')
+                
+
+        for i in range(len(teamList)):
+            output += '**Team {}**\n'.format(str(i+1))
+            for j in range(len(teamList[i])):
+                output += teamList[i][j]
+            output += '\n'
+
+        #print (teamList)
+        await context.send(output)
+        return
 
 
 
