@@ -64,7 +64,7 @@ class Fun(commands.Cog):
         img = Image.open(BytesIO(response.content))
         img = img.resize((256,50))
 
-        sign = Image.open("PebbleOptions\\{}.png".format(str(result))).convert('RGBA')
+        sign = Image.open("Assets\\PebbleOptions\\{}.png".format(str(result))).convert('RGBA')
         avatar = img.copy().convert('RGBA')
         avatar.paste(sign,(0,0), mask = sign)
 
