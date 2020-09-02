@@ -8,6 +8,8 @@ gamesList = []
 
 class Game(commands.Cog):
 
+    description = "Pebble's commands related for game activities"
+
     def __init__(self, client):
         self.client = client
 

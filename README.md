@@ -1,2 +1,2 @@
-# Squire
+# Pebble
 Personal Discord Bot

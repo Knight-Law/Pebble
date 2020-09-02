@@ -5,6 +5,8 @@ from main import*
 
 class Admin(commands.Cog):
 
+    description = "Pebble's commands that are for administration only"
+
     def __init__(self, client):
         self.client = client
 

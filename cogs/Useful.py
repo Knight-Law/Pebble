@@ -9,6 +9,8 @@ from main import*
 
 class Useful(commands.Cog):
 
+    description = "Pebble's commands that will prove useful to the user"
+
     def __init__(self, client):
         self.client = client
 

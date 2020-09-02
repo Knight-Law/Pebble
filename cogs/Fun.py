@@ -9,6 +9,7 @@ from io import BytesIO
 from main import*
 
 class Fun(commands.Cog):
+    description = "Pebble's commands that will gift the user with entertainment"
 
     def __init__(self, client):
         self.client = client
@@ -143,7 +144,7 @@ class Fun(commands.Cog):
                     pass_context=True,
                     aliases =['sm'])
     async def ballresponse(self, context):
-        newMSG = await context.send(file=discord.File('PebbleShatter.gif'))#delete_after = 0.1)
+        newMSG = await context.send(file=discord.File('Assets\\PebbleOptions\\PebbleShatter.gif'))#delete_after = 0.1)
         cur, conn = getConnect()
         cur = conn.cursor()
         cur.execute('SELECT "response" FROM answers')
