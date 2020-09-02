@@ -1,6 +1,10 @@
 import discord
 from discord.ext import commands
 from main import*
+from discord.ext import tasks
+from datetime import datetime
+
+gamesList = []
 
 class Game(commands.Cog):
 
@@ -10,7 +14,9 @@ class Game(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         print('Game Cog is good.')
+        cleanUp.start()
 
+  
 
     @commands.command(name='playwhat',
                     description="Pebble will decide a random game for you",
@@ -116,6 +122,22 @@ class Game(commands.Cog):
         embed = discord.Embed(title=nameFound,description = descriptionFound,url = urlFound)
         await context.send(embed=embed)
         return
+
+@tasks.loop(seconds=21)
+async def cleanUp():
+    global gamesList
+    amountDeleted = 0
+    copyList = gamesList.copy()
+    i = 0
+    for i in range(len(gamesList)):
+        d1 = gamesList[i][1]
+        d2 = datetime.now()
+        d2 = d2-d1
+        if (d2.total_seconds()>20):
+            del copyList[i-amountDeleted]
+    gamesList = copyList.copy()
+    return
+
 def setup(client):
     client.add_cog(Game(client))
 

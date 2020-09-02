@@ -87,8 +87,8 @@ class Fun(commands.Cog):
             await context.send("*Pebble deems your message too long and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
             return
 
-        sign = Image.open("AmongUs\\Sign.png").convert('RGBA')
-        player = Image.open("AmongUs\\{}.png".format(colorChoice)).convert('RGBA')
+        sign = Image.open("Assets\\Sign\\Sign.png").convert('RGBA')
+        player = Image.open("Assets\\Sign\\{}.png".format(colorChoice)).convert('RGBA')
         player = player.resize ((256,256))
         player.paste(sign,(0,0), mask = sign)
 
@@ -128,7 +128,7 @@ class Fun(commands.Cog):
 
         for x in range(gifFrames):
             output.append(avatar.copy())
-            im = Image.open("Hands\\{}.png".format(str(x+1))).convert('RGBA')
+            im = Image.open("Assets\\Hands\\{}.png".format(str(x+1))).convert('RGBA')
             output[x].paste(im,(0,0), mask = im)
 
         final = output[0]

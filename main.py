@@ -11,7 +11,6 @@ from discord.ext import tasks
 from discord.ext.commands import Bot
 from config import config
 
-gamesList = []
 
 BOT_PREFIX = (".")
 client = Bot(command_prefix=BOT_PREFIX)
@@ -46,11 +45,11 @@ def getConnect():
         print(error)
 
 #Segment to load and unload cogs
-@client.command()
+@client.command(hidden = True)
 async def load(context, extension):
     client.load_extension(f'cogs.{extension}')
 
-@client.command()
+@client.command(hidden = True)
 async def unload(context, extension):
     client.unload_extension(f'cogs.{extension}')
 
@@ -64,69 +63,50 @@ def initilizeBot():
         TOKEN = fp.read()
     finally:
         fp.close()
+    client.run(TOKEN)
+    return
 
+    
 
-    @tasks.loop(seconds=21)
-    async def cleanUp():
-        global gamesList
-        amountDeleted = 0
-        copyList = gamesList.copy()
-        i = 0
-        for i in range(len(gamesList)):
-            d1 = gamesList[i][1]
-            d2 = datetime.now()
-            d2 = d2-d1
-            if (d2.total_seconds()>20):
-                del copyList[i-amountDeleted]
-        gamesList = copyList.copy()
+#Bot will give a reaction or message depending on the userID paramters
+@client.event
+async def on_message(message):
+    cur, conn = getConnect()
+    await client.process_commands(message)
+
+    if message.author == client.user:
         return
 
-    @client.event
-    async def on_ready():
-        cleanUp.start()
-
-    #Bot will give a reaction or message depending on the userID paramters
-    @client.event
-    async def on_message(message):
-        cur, conn = getConnect()
-        await client.process_commands(message)
-
-        if message.author == client.user:
-            return
-
-        channel = message.channel
-        cur.execute('SELECT * FROM users WHERE "userID"=\'{}\'AND"server"=\'{}\''.format(message.author.id,message.guild.id))
-        user = cur.fetchall()
-        if not user:
-            print("{} has been aded to the database".format(message.author.name))
-            cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\', {})'.format('\''+str(message.author.id)+'\'','\''+message.author.name+'\'','\''+str(message.guild.id)+'\''))
-            conn.commit()
-            conn.close()
-            return
-
-        if (user[0][4]==True):
-            embed = discord.Embed(title=user[0][6], color=0xDBC4C4)
-            await message.channel.send(embed=embed)
-        if (user[0][5]==True):
-            await message.add_reaction(user[0][7])
+    channel = message.channel
+    cur.execute('SELECT * FROM users WHERE "userID"=\'{}\'AND"server"=\'{}\''.format(message.author.id,message.guild.id))
+    user = cur.fetchall()
+    if not user:
+        print("{} has been aded to the database".format(message.author.name))
+        cur.execute('INSERT INTO users VALUES ({},{},false, false, false, false, \'None\',\':JensCake:662156604270968843\', {})'.format('\''+str(message.author.id)+'\'','\''+message.author.name+'\'','\''+str(message.guild.id)+'\''))
+        conn.commit()
         conn.close()
         return
 
-    
-    
-    #Exit 
-    @client.command(name='exit',
-                    description="Pebble goes bye",
-                    brief="Pebble goes bye",
-                    pass_context=True)
-    async def endProgram(context):
-        #client.close()
-        #sys.exit()
-        return
-
-    client.run(TOKEN)
+    if (user[0][4]==True):
+        embed = discord.Embed(title=user[0][6], color=0xDBC4C4)
+        await message.channel.send(embed=embed)
+    if (user[0][5]==True):
+        await message.add_reaction(user[0][7])
+    conn.close()
+    return
 
 
+
+#Exit 
+@client.command(name='exit',
+                description="Pebble goes bye",
+                brief="Pebble goes bye",
+                pass_context=True,
+                hidden = True)
+async def endProgram(context):
+    #client.close()
+    #sys.exit()
+    return
 
 if __name__ == '__main__':
     testConnect()
