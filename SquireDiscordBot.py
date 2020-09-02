@@ -16,9 +16,11 @@ from io import BytesIO
 from datetime import datetime
 from discord import Game
 from discord.ext import tasks
+from discord.ext import commands
 from discord.ext.commands import Bot
 from config import config
 from PIL import Image, ImageColor, ImageDraw, ImageSequence, ImageFont
+
 
 gamesList = []
 
@@ -119,6 +121,22 @@ def initilizeBot():
         #await client.send_message(channel,"I support breast cancer")
         #await client.add_reaction(message,':yikes:589332576909525012')
         #await client.add_reaction(message,'a:hc:659191821506838528')
+
+    @client.command(name='signList',
+                    description="Pebble will show all the choices for the sign command",
+                    brief="Pebble will show all the choices for the sign command",
+                    pass_context=True)
+    async def files(context):
+        characterList = (os.listdir("AmongUs\\"))
+        output = ''
+        characterList.remove('Sign.png')
+        for i in range(len(characterList)):
+            if ".png" in characterList[i]:
+                output += "{}\n".format(characterList[i].replace('.png',''))
+        if output == '':
+            output = 'No Files'
+        await context.send("```{}```".format(output))
+        return
 
     @client.command(name='soulmate',
                     description="Pebble will see the compatibility between two people",
@@ -479,51 +497,51 @@ def initilizeBot():
         return
 
     #Overlays a gif over a targetted user's avatar
-    @client.command(name='resize',
-                description="Pebble will take an image of your choice and resize it",
-                brief="Pebble will take an image of your choice and resize its",
-                pass_context=True)
-    async def resize(context,imageType, imageUrl, width, height):
-        if (not context.message.author.guild_permissions.administrator):
-            await context.send ('```You do not have permission to use this```')
-            return
-        size = (int(width),int(height))
-        if (size[0] > 300 or size[1] > 300):
-            await context.send("*Pebble deems resolution is too big and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
-            return
+    # @client.command(name='resize',
+    #             description="Pebble will take an image of your choice and resize it",
+    #             brief="Pebble will take an image of your choice and resize its",
+    #             pass_context=True)
+    # async def resize(context,imageType, imageUrl, width, height):
+    #     if (not context.message.author.guild_permissions.administrator):
+    #         await context.send ('```You do not have permission to use this```')
+    #         return
+    #     size = (int(width),int(height))
+    #     if (size[0] > 300 or size[1] > 300):
+    #         await context.send("*Pebble deems resolution is too big and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+    #         return
 
-        response = requests.get(imageUrl)
-        img = Image.open(BytesIO(response.content))
+    #     response = requests.get(imageUrl)
+    #     img = Image.open(BytesIO(response.content))
         
 
-        #print(Image.MIME[img.format])
-        #final.save('out.gif','GIF',save_all=True, append_images= output, optimize=True, duration=70, loop=0, transparency = 0, disposal = 2)
-        if (imageType == 'png'):
-            img = img.resize(size)
-            img.save('resize.{}'.format('png'))
-            await context.send(file=discord.File('resize.{}'.format('png')))
-        elif (imageType == 'gif'):
-            # Get sequence iterator
-            frames = ImageSequence.Iterator(img)
+    #     #print(Image.MIME[img.format])
+    #     #final.save('out.gif','GIF',save_all=True, append_images= output, optimize=True, duration=70, loop=0, transparency = 0, disposal = 2)
+    #     if (imageType == 'png'):
+    #         img = img.resize(size)
+    #         img.save('resize.{}'.format('png'))
+    #         await context.send(file=discord.File('resize.{}'.format('png')))
+    #     elif (imageType == 'gif'):
+    #         # Get sequence iterator
+    #         frames = ImageSequence.Iterator(img)
 
-            # Wrap on-the-fly thumbnail generator
-            def thumbnails(frames):
-                for frame in frames:
-                    thumbnail = frame.copy()
-                    thumbnail.thumbnail(size)
-                    yield thumbnail
+    #         # Wrap on-the-fly thumbnail generator
+    #         def thumbnails(frames):
+    #             for frame in frames:
+    #                 thumbnail = frame.copy()
+    #                 thumbnail.thumbnail(size)
+    #                 yield thumbnail
 
-            frames = thumbnails(frames)
+    #         frames = thumbnails(frames)
 
-            # Save output
-            om = next(frames) # Handle first frame separately
-            om.info = img.info # Copy sequence info
-            om.save("resize.gif", save_all=True, append_images=list(frames), loop = 0)         
-            await context.send(file=discord.File('resize.{}'.format('gif')))   
-        else:
-            await context.send("*Pebble deems your image type invalid and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
-            return
-        return
+    #         # Save output
+    #         om = next(frames) # Handle first frame separately
+    #         om.info = img.info # Copy sequence info
+    #         om.save("resize.gif", save_all=True, append_images=list(frames), loop = 0)         
+    #         await context.send(file=discord.File('resize.{}'.format('gif')))   
+    #     else:
+    #         await context.send("*Pebble deems your image type invalid and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+    #         return
+    #     return
     
 
     #sign
