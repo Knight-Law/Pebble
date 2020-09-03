@@ -178,8 +178,18 @@ class Useful(commands.Cog):
             output += '\n'
 
         await context.send(output)
+        return     
+        
+    #Send user the first Google result
+    @commands.command(name='google',
+                description="Pebble will give you the first link of your Google search",
+                brief="Pebble will give you the first link of your Google search",
+                pass_context=True)
+    async def google(self, context,*, search):
+        #search = search.replace(" ","+")
+        embed = discord.Embed(title=search, url="https://www.google.com/search?q={}&btnI".format(search.replace(" ","+")))
+        await context.send(embed=embed)
         return
-
 
 def setup(client):
     client.add_cog(Useful(client))

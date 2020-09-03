@@ -3,6 +3,7 @@ import random
 import textwrap
 import requests
 import re
+import math
 from discord.ext import commands
 from PIL import Image, ImageColor, ImageDraw, ImageSequence, ImageFont
 from io import BytesIO
@@ -206,6 +207,70 @@ class Fun(commands.Cog):
         embed.add_field(name="\u200b", value="Message for {} is {}".format(target,user[0][6]), inline=False)
         await context.send(embed=embed)
         return
+
+    #Take user's avatar and multiple parameters to create a Yu-Gi-OH card 
+    @commands.command(name="summon",
+            description="Pebble will summon the target",
+            brief = 'Pebble will summon the target',
+            pass_context = True)
+    async def summon(self, context, target:discord.User, effect):
+        if (len(effect)>210):
+            await context.send("*Pebble deems your message too long and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
+            return
+        response = requests.get(target.avatar_url)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize((199,201))
+
+        random.seed(target.id)
+        element = Image.open("Assets\\Summon\\{}.png".format(str(random.randint(1,6)))).convert('RGBA')
+        card = Image.open("Assets\\Summon\\Card.png").convert('RGBA')
+        star = Image.open("Assets\\Summon\\Star.png").convert('RGBA') 
+        avatar = img.copy().convert('RGBA')
+        
+
+        random.seed(target.id+1)
+        attack = str(100*random.randint(0,50))
+        random.seed(int(str(target.id+1)[::-1]))
+        defense = str(100*random.randint(0,50))
+
+        stars = math.floor((int(attack)+int(defense))/1000)
+        if (target.id == 658872372140441602):
+            stars = 11
+            attack = '∞'
+            defense = '∞'
+            effect = 'Having this card in your deck automatically grants you victory'
+            element = Image.open("Assets\\Summon\\pebble.png").convert('RGBA')
+            #star = Image.open("Assets\\Summon\\pebble.png").convert('RGBA')
+        
+
+        card.paste(avatar,(38,89), mask = avatar)
+        card.paste(element,(219,22), mask = element)
+
+
+        draw = ImageDraw.Draw(card)
+        nameFont = ImageFont.truetype("arial.ttf", 16)
+        statFont = ImageFont.truetype("arial.ttf", 10)
+        draw.text((28, 28),target.display_name,(0,0,0),font=nameFont)
+        draw.text((146, 369),'ATK/{}'.format(attack),(0,0,0),font=statFont)
+        draw.text((200, 369),'DEF/{}'.format(defense),(0,0,0),font=statFont)
+        for i in range(stars):
+            card.paste(star,(225+(i*-20),62), mask = star)
+
+        h = 308
+        w = 275 
+        lines = textwrap.wrap(effect, width=45)
+        y_text = h
+        for line in lines:
+            width, height = statFont.getsize(line)
+            draw.text(((w - width) / 2, y_text), line, (0,0,0),font=statFont)
+            y_text += height
+
+
+        card.save('output.png')
+        await context.send(file=discord.File('output.png'))
+
+
+
 def setup(client):
     client.add_cog(Fun(client))
 
