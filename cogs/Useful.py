@@ -2,6 +2,7 @@ import discord
 import requests
 import os
 import math
+import random
 from io import BytesIO
 from PIL import Image, ImageSequence
 from discord.ext import commands
@@ -66,7 +67,7 @@ class Useful(commands.Cog):
                     brief="Pebble will show all the choices for the sign command",
                     pass_context=True)
     async def files(self, context):
-        characterList = (os.listdir("AmongUs\\"))
+        characterList = (os.listdir("Assets/Sign/"))
         output = ''
         characterList.remove('Sign.png')
         for i in range(len(characterList)):
@@ -136,6 +137,23 @@ class Useful(commands.Cog):
             await context.send('Invalid Hex Color Code')
         return
 
+    
+    @commands.command(name='truecolor',
+                description="Pebble will print a color from the hex color code given",
+                brief="Pebble will print a color from the hex color code given",
+                pass_context=True)
+    async def printColor(self, context, target:discord.User):
+        random.seed(target.id)
+        r = random.randint(0,255)
+        random.seed(target.id-255)
+        g = random.randint(0,255)
+        random.seed(target.id+255)
+        b = random.randint(0,255)
+        im = Image.new(mode = "RGB", size = (25, 25), color = (r,g,b))
+        pixel = im.save('simplePixel.png') 
+        await context.send("#{:02x}{:02x}{:02x}".format(r,g,b),file=discord.File('simplePixel.png'))
+
+
     #Pebble will randomly assign team from people currently connected in a voice channel
     @commands.command(name='select',
                 description="Pebble will select your teams",
@@ -189,6 +207,48 @@ class Useful(commands.Cog):
         #search = search.replace(" ","+")
         embed = discord.Embed(title=search, url="https://www.google.com/search?q={}&btnI".format(search.replace(" ","+")))
         await context.send(embed=embed)
+        return
+
+    @commands.command(name='colorlist',
+                description="Pebble will print out all the colors of the roles",
+                brief="Pebble will print out all the colors of the role",
+                pass_context=True)
+    async def colorList(self, context):  
+        colorArr = []
+        countArr = []
+        nameArr = []
+        #output = ""
+        for i in context.message.author.guild.roles:
+            if i.color in colorArr:
+                #colorArray[colorArray.index(i.color)].append[i.name]
+                countArr[colorArr.index(i.color)] += 1
+                nameArr[colorArr.index(i.color)].append (i.name)
+                #print ("duplicate")
+            else:
+                colorArr.append(i.color)
+                countArr.append(1)
+                nameArr.append([])
+                nameArr[-1].append(i.name)
+                #colorArray[-1].append(i.color)
+                #colorArray[colorArray.index(i.color)].append[i.name]
+                #colorArray[0].append[i.name]
+        #for i in test:
+
+            #output += (i.name + " " +str(i.color)+'\n')
+        #await context.send(str(test)[0:1999])
+
+        output = ''
+
+        for i in range(len(colorArr)):
+            output += (str(nameArr[i]) + " "+ str(colorArr[i]) +" "+ str(countArr[i]) + '\n')
+
+        cycles = None
+        if (len(output)>2000):
+            cycles = math.ceil(len(output)/2000) 
+            for i in range (cycles):
+                await context.send(output[0+(i*2000):1999+(i*2000)])
+        else:
+            await context.send(output)
         return
 
 def setup(client):

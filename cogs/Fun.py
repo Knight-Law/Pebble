@@ -66,7 +66,7 @@ class Fun(commands.Cog):
         img = Image.open(BytesIO(response.content))
         img = img.resize((256,50))
 
-        sign = Image.open("Assets\\PebbleOptions\\{}.png".format(str(result))).convert('RGBA')
+        sign = Image.open("Assets/PebbleOptions/{}.png".format(str(result))).convert('RGBA')
         avatar = img.copy().convert('RGBA')
         avatar.paste(sign,(0,0), mask = sign)
 
@@ -84,19 +84,18 @@ class Fun(commands.Cog):
                     description="Select a character and a message in \"\" ",
                     brief="Pebble forces a character to hold a sign",
                     pass_context=True)
-    async def messageToggle(self, context, colorChoice, message):
+    async def messageToggle(self, context, signChoice, message):
         if (len(message)>75):
             await context.send("*Pebble deems your message too long and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
             return
-
-        sign = Image.open("Assets\\Sign\\Sign.png").convert('RGBA')
-        player = Image.open("Assets\\Sign\\{}.png".format(colorChoice)).convert('RGBA')
+        signChoice = signChoice.lower()
+        sign = Image.open("Assets/Sign/Sign.png").convert('RGBA')
+        player = Image.open("Assets/Sign/{}.png".format(signChoice)).convert('RGBA')
         player = player.resize ((256,256))
         player.paste(sign,(0,0), mask = sign)
 
         draw = ImageDraw.Draw(player)
         font = ImageFont.truetype("arial.ttf", 16)
-        #draw.text((24, 191),message,(0,0,0),font=font)
         h = 180
         w = 240 
         lines = textwrap.wrap(message, width=25)
@@ -130,7 +129,7 @@ class Fun(commands.Cog):
 
         for x in range(gifFrames):
             output.append(avatar.copy())
-            im = Image.open("Assets\\Hands\\{}.png".format(str(x+1))).convert('RGBA')
+            im = Image.open("Assets/Hands/{}.png".format(str(x+1))).convert('RGBA')
             output[x].paste(im,(0,0), mask = im)
 
         final = output[0]
@@ -145,7 +144,7 @@ class Fun(commands.Cog):
                     pass_context=True,
                     aliases =['sm'])
     async def ballresponse(self, context):
-        newMSG = await context.send(file=discord.File('Assets\\PebbleOptions\\PebbleShatter.gif'))#delete_after = 0.1)
+        newMSG = await context.send(file=discord.File('Assets/PebbleOptions/PebbleShatter.gif'))#delete_after = 0.1)
         cur, conn = getConnect()
         cur = conn.cursor()
         cur.execute('SELECT "response" FROM answers')
@@ -213,7 +212,7 @@ class Fun(commands.Cog):
             description="Pebble will summon the target",
             brief = 'Pebble will summon the target',
             pass_context = True)
-    async def summon(self, context, target:discord.User, effect):
+    async def summon(self, context, target:discord.User, *,effect):
         if (len(effect)>210):
             await context.send("*Pebble deems your message too long and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
             return
@@ -222,9 +221,9 @@ class Fun(commands.Cog):
         img = img.resize((199,201))
 
         random.seed(target.id)
-        element = Image.open("Assets\\Summon\\{}.png".format(str(random.randint(1,6)))).convert('RGBA')
-        card = Image.open("Assets\\Summon\\Card.png").convert('RGBA')
-        star = Image.open("Assets\\Summon\\Star.png").convert('RGBA') 
+        element = Image.open("Assets/Summon/{}.png".format(str(random.randint(1,6)))).convert('RGBA')
+        card = Image.open("Assets/Summon/card.png").convert('RGBA')
+        star = Image.open("Assets/Summon/star.png").convert('RGBA') 
         avatar = img.copy().convert('RGBA')
         
 
@@ -239,8 +238,8 @@ class Fun(commands.Cog):
             attack = '∞'
             defense = '∞'
             effect = 'Having this card in your deck automatically grants you victory'
-            element = Image.open("Assets\\Summon\\pebble.png").convert('RGBA')
-            #star = Image.open("Assets\\Summon\\pebble.png").convert('RGBA')
+            element = Image.open("Assets/Summon/pebble.png").convert('RGBA')
+            #star = Image.open("Assets/Summon/pebble.png").convert('RGBA')
         
 
         card.paste(avatar,(38,89), mask = avatar)

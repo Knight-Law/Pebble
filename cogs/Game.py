@@ -99,7 +99,7 @@ class Game(commands.Cog):
                         description="Pebble will give you information on a game from the list",
                         brief="Pebble will give you information on a game from the list",
                         pass_context=True)
-    async def whatGame(self, context, number:int):
+    async def gameInfo(self, context, number:int):
         global gamesList
         hasIt = False
         for i in range (len(gamesList)):
