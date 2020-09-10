@@ -6,7 +6,11 @@ import random
 from io import BytesIO
 from PIL import Image, ImageSequence
 from discord.ext import commands
+from discord.ext import tasks
 from main import*
+from datetime import datetime,timedelta
+
+clientReference = client
 
 class Useful(commands.Cog):
 
@@ -14,9 +18,12 @@ class Useful(commands.Cog):
 
     def __init__(self, client):
         self.client = client
+        global clientReference
+        clientReference = client
 
     @commands.Cog.listener()
     async def on_ready(self):
+        reminder.start()
         print('Useful Cog is good.')
 
     @commands.command(name='resize',
@@ -250,6 +257,66 @@ class Useful(commands.Cog):
         else:
             await context.send(output)
         return
+
+    #Will reminder the user after a specificied amount of time
+    @commands.command(name='remind',
+                description="Pebble will remind you about something",
+                brief="Pebble will remind you about something",
+                pass_context=True)
+    async def remind(self, context, targetToRemind, timeAmoumt, timeType, *, message):  
+        now = datetime.now()
+        try:
+            timeAmount = int(timeAmoumt)
+        except:
+            await context.send("Invalid amount of time")
+            return
+
+        if (timeType == 'sec' or timeType == 'second' or timeType == "seconds"):
+            timeToRemind = now + timedelta(0,timeAmount)
+        elif (timeType == 'min' or timeType == 'minute' or timeType == "minutes"):
+            timeToRemind = now + timedelta(0,0,0,0,timeAmount)
+        elif (timeType == 'day' or timeType == 'days'):
+            timeToRemind = now + timedelta(timeAmount)
+        else:
+            await context.send("Wrong Time Type")
+            return
+
+        cur, conn = getConnect()
+        cur.execute('INSERT INTO reminders VALUES ({},{},{},{},{})'.format('\''+str(context.message.author.id)+'\'', '\''+targetToRemind+'\'','\''+str(timeToRemind)+'\'', '\''+message+'\'', '\''+str(context.message.channel.id)+'\''))
+        conn.commit()
+        conn.close()
+        
+        await context.send("Pebble will remind you when it is time")
+        return
+
+    # @commands.command(name='remindat',
+    #             description="Pebble will remind you about something",
+    #             brief="Pebble will remind you about something",
+    #             pass_context=True)
+    # async def remindAt(self, context, targetToRemind, timeToRemind, *, message):  
+    #     print(context.message.created_at)
+    #     newTime = context.message.created_at + timedelta(0,3)
+    #     print(newTime)
+    #     return
+
+#Set this as an SQL database to grab all the ones I need
+@tasks.loop(seconds=1)
+async def reminder():
+    cur, conn = getConnect()
+    cur = conn.cursor()
+    cur.execute('SELECT * FROM reminders')
+    user = cur.fetchall()
+    now = datetime.now()
+
+    for i in user:
+        if ((datetime.strptime(i[2], '%Y-%m-%d %H:%M:%S.%f') - now).total_seconds() <= 0 ):
+            channel = clientReference.get_channel(int(i[4]))
+            await channel.send("Reminder for {} : {}".format(i[1], i[3]))
+            cur.execute ('DELETE FROM reminders WHERE "ID" = \'{}\' AND "timestamp" =\'{}\''.format(i[0],i[2]))
+            conn.commit()
+            print ('DELETE FROM reminders WHERE "ID" = \'{}\' AND "timestamp" =\'{}\''.format(i[0],i[2]))
+    conn.close()
+    return
 
 def setup(client):
     client.add_cog(Useful(client))
