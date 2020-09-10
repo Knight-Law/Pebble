@@ -29,7 +29,7 @@ class Game(commands.Cog):
     async def whatGame(self, context, gameType):
         cur, conn = getConnect()
         cur = conn.cursor()
-        gameType = gamesList.lower()
+        gameType = gameType.lower()
 
         if (gameType == 'tts'):
             cur.execute('SELECT "name","description","url" FROM games WHERE "TTS" = true')
