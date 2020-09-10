@@ -1,4 +1,5 @@
 import discord
+import random
 from discord.ext import commands
 from main import*
 from discord.ext import tasks
@@ -28,7 +29,7 @@ class Game(commands.Cog):
     async def whatGame(self, context, gameType):
         cur, conn = getConnect()
         cur = conn.cursor()
-        
+        gameType = gamesList.lower()
 
         if (gameType == 'tts'):
             cur.execute('SELECT "name","description","url" FROM games WHERE "TTS" = true')
