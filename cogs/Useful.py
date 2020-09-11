@@ -275,6 +275,8 @@ class Useful(commands.Cog):
             timeToRemind = now + timedelta(0,timeAmount)
         elif (timeType == 'min' or timeType == 'minute' or timeType == "minutes"):
             timeToRemind = now + timedelta(0,0,0,0,timeAmount)
+        elif (timeType == 'hour' or timeType == 'hours'):
+            timeToRemind = now + timedelta(0,0,0,0,0, timeAmoumt)
         elif (timeType == 'day' or timeType == 'days'):
             timeToRemind = now + timedelta(timeAmount)
         else:
