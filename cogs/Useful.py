@@ -91,7 +91,7 @@ class Useful(commands.Cog):
                     pass_context=True,
                     aliases =['ac'])
     async def allchannels(self, context, type):
-
+        type = type.lower()
         if (type != "text" and type != "voice" and type!= "all"):
             await context.send("*Pebble deems your mode choice invalid and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
             return
@@ -105,28 +105,29 @@ class Useful(commands.Cog):
             for i in context.message.author.guild.channels:
                 if (i.type.name == 'text' or i.type.name == 'voice'):
                     voiceChanneList.append((i.id,i.type.name,i.name,i.members))
-                    
+
+
         if (type == 'voice'):
-            output = '**#. Name : ID : People in Call**\n'
+            output = ['**#. Name : ID : People in Call**\n']
         elif (type == 'text'):
-            output = '**#. Name : ID : People with Accessed**\n'
+            output = ['**#. Name : ID : People with Accessed**\n']
         elif (type == 'all'):
-            output = '**#. Name : ID : People with Accessed : Type**\n'
+            output = ['**#. Name : ID : People with Accessed : Type**\n']
+
 
         if (type == 'voice' or type =='text'):
             for i in range(len(voiceChanneList)):
-                output += "{}. {} : {} : {}\n".format(i+1,voiceChanneList[i][2],voiceChanneList[i][0],len(voiceChanneList[i][3]))
+                if (len(output[-1])>1900):
+                    output.append('')
+                output[-1] += "{}. {} : {} : {}\n".format(i+1,voiceChanneList[i][2],voiceChanneList[i][0],len(voiceChanneList[i][3]))
         elif (type == 'all'):
             for i in range(len(voiceChanneList)):
-                output += "{}. {} : {} : {} : {}\n".format(i+1,voiceChanneList[i][2],voiceChanneList[i][0],len(voiceChanneList[i][3]),voiceChanneList[i][1])
+                if (len(output[-1])>1900):
+                    output.append('')
+                output[-1] += "{}. {} : {} : {} : {}\n".format(i+1,voiceChanneList[i][2],voiceChanneList[i][0],len(voiceChanneList[i][3]),voiceChanneList[i][1])
 
-        cycles = None
-        if (len(output)>2000):
-            cycles = math.ceil(len(output)/2000) 
-            for i in range (cycles):
-                await context.send(output[0+(i*2000):1999+(i*2000)])
-        else:
-            await context.send(output)
+        for i in output:
+            await context.send(i)
         return
 
     #Takes a hexcolor code and draw an image of the color
@@ -232,20 +233,34 @@ class Useful(commands.Cog):
                 colorArr.append(i.color)
                 countArr.append(1)
                 nameArr.append([])
-                nameArr[-1].append(i.name)
+                if (i.name=="@everyone"):
+                    nameArr[-1].append('everyone')
+                else:
+                    nameArr[-1].append(i.name)
 
-        output = ''
+        # output = ''
 
+        # for i in range(len(colorArr)):
+        #     output += (str(nameArr[i]) + " "+ str(colorArr[i]) +" "+ str(countArr[i]) + '\n')
+
+        # cycles = None
+        # if (len(output)>2000):
+        #     cycles = math.ceil(len(output)/2000) 
+        #     for i in range (cycles):
+        #         await context.send(output[0+(i*2000):1999+(i*2000)])
+        # else:
+        #     await context.send(output)
+
+        output=[]
+        output.append('')
         for i in range(len(colorArr)):
-            output += (str(nameArr[i]) + " "+ str(colorArr[i]) +" "+ str(countArr[i]) + '\n')
+            if (len(output[-1])>1900):
+                output.append('')
+            output[-1] += (str(nameArr[i]) + " : "+ str(colorArr[i]) +" : "+ str(countArr[i]) + 'x\n')
+        for i in output:
+            await context.send(i)
+        
 
-        cycles = None
-        if (len(output)>2000):
-            cycles = math.ceil(len(output)/2000) 
-            for i in range (cycles):
-                await context.send(output[0+(i*2000):1999+(i*2000)])
-        else:
-            await context.send(output)
         return
 
     #Will reminder the user after a specificied amount of time
@@ -307,7 +322,7 @@ async def reminder():
             await channel.send("Reminder for {} : {}".format(i[1], i[3]))
             cur.execute ('DELETE FROM reminders WHERE "ID" = \'{}\' AND "timestamp" =\'{}\''.format(i[0],i[2]))
             conn.commit()
-            print ('DELETE FROM reminders WHERE "ID" = \'{}\' AND "timestamp" =\'{}\''.format(i[0],i[2]))
+            #print ('DELETE FROM reminders WHERE "ID" = \'{}\' AND "timestamp" =\'{}\''.format(i[0],i[2]))
     conn.close()
     return
 
