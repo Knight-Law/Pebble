@@ -12,7 +12,7 @@ from discord.ext.commands import Bot
 from config import config
 
 
-BOT_PREFIX = (".")
+BOT_PREFIX = (">")
 client = Bot(command_prefix=BOT_PREFIX)
 
 

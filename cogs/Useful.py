@@ -149,7 +149,7 @@ class Useful(commands.Cog):
                 description="Pebble will print a color from the hex color code given",
                 brief="Pebble will print a color from the hex color code given",
                 pass_context=True)
-    async def printColor(self, context, target:discord.User):
+    async def truecolor(self, context, target:discord.User):
         random.seed(target.id)
         r = random.randint(0,255)
         random.seed(target.id-255)
@@ -224,25 +224,15 @@ class Useful(commands.Cog):
         colorArr = []
         countArr = []
         nameArr = []
-        #output = ""
         for i in context.message.author.guild.roles:
             if i.color in colorArr:
-                #colorArray[colorArray.index(i.color)].append[i.name]
                 countArr[colorArr.index(i.color)] += 1
                 nameArr[colorArr.index(i.color)].append (i.name)
-                #print ("duplicate")
             else:
                 colorArr.append(i.color)
                 countArr.append(1)
                 nameArr.append([])
                 nameArr[-1].append(i.name)
-                #colorArray[-1].append(i.color)
-                #colorArray[colorArray.index(i.color)].append[i.name]
-                #colorArray[0].append[i.name]
-        #for i in test:
-
-            #output += (i.name + " " +str(i.color)+'\n')
-        #await context.send(str(test)[0:1999])
 
         output = ''
 
@@ -265,6 +255,7 @@ class Useful(commands.Cog):
                 pass_context=True)
     async def remind(self, context, targetToRemind, timeAmoumt, timeType, *, message):  
         now = datetime.now()
+        timeType = timeType.lower()
         try:
             timeAmount = int(timeAmoumt)
         except:
