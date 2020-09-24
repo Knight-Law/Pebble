@@ -35,7 +35,7 @@ class Useful(commands.Cog):
             await context.send ('```You do not have permission to use this```')
             return
         size = (int(width),int(height))
-        if (size[0] > 300 or size[1] > 300):
+        if (size[0] > 2000 or size[1] > 2000):
             await context.send("*Pebble deems resolution is too big and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
             return
 
@@ -147,8 +147,8 @@ class Useful(commands.Cog):
 
     
     @commands.command(name='truecolor',
-                description="Pebble will print a color from the hex color code given",
-                brief="Pebble will print a color from the hex color code given",
+                description="Pebble will give a random color based on your user id",
+                brief="Pebble will give a random color based on your user id",
                 pass_context=True)
     async def truecolor(self, context, target:discord.User):
         random.seed(target.id)
@@ -268,11 +268,11 @@ class Useful(commands.Cog):
                 description="Pebble will remind you about something",
                 brief="Pebble will remind you about something",
                 pass_context=True)
-    async def remind(self, context, targetToRemind, timeAmoumt, timeType, *, message):  
+    async def remind(self, context, targetToRemind, timeAmount, timeType, *, message):  
         now = datetime.now()
         timeType = timeType.lower()
         try:
-            timeAmount = int(timeAmoumt)
+            timeAmount = int(timeAmount)
         except:
             await context.send("Invalid amount of time")
             return
@@ -282,7 +282,7 @@ class Useful(commands.Cog):
         elif (timeType == 'min' or timeType == 'minute' or timeType == "minutes"):
             timeToRemind = now + timedelta(0,0,0,0,timeAmount)
         elif (timeType == 'hour' or timeType == 'hours'):
-            timeToRemind = now + timedelta(0,0,0,0,0, timeAmoumt)
+            timeToRemind = now + timedelta(0,0,0,0,0,timeAmount)
         elif (timeType == 'day' or timeType == 'days'):
             timeToRemind = now + timedelta(timeAmount)
         else:
