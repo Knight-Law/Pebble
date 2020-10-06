@@ -108,6 +108,8 @@ async def endProgram(context):
     #sys.exit()
     return
 
+
+
 if __name__ == '__main__':
     testConnect()
     initilizeBot()

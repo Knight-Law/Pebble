@@ -7,6 +7,7 @@ from io import BytesIO
 from PIL import Image, ImageSequence
 from discord.ext import commands
 from discord.ext import tasks
+from discord.utils import get
 from main import*
 from datetime import datetime,timedelta
 
@@ -308,6 +309,43 @@ class Useful(commands.Cog):
     #     return
 
 #Set this as an SQL database to grab all the ones I need
+
+    @commands.command(name='changemycolor',
+                        description="Pebble will show all the choices for the sign command",
+                        brief="Pebble will show all the choices for the sign command",
+                        pass_context=True,
+                        aliases =['cmc'],
+                        hidden = True)
+    async def changemycolor(self, context,hue):
+            match = re.search(r'^(?:[0-9a-fA-F]{3}){1,2}$', hue) #Checks for valid hex color code
+            if not match:
+                await context.send('Invalid Hex Color Code')
+                return
+     
+            user = context.author
+            guild = context.guild
+            role = ''
+            for i in context.message.author.guild.roles:
+                if i.name == str(user.id):
+                    role = i
+            if not role:
+                role = await guild.create_role(name="{}".format(user.id),colour=discord.Colour(0xffffff))
+                total = len(context.message.author.guild.roles)
+                await user.add_roles(role)
+                await role.edit(position=total-2)
+            await role.edit(color=int('0x'+hue,0))
+            await context.send('Pebble has changed your color')
+            return
+
+            
+    #  @commands.command(name='role',
+    #                     description="Pebble will give or take away the role of your choice",
+    #                     brief="Pebble will give or take away the role of your choice",
+    #                     pass_context=True,
+    #                     aliases =['cmc'])
+    # async def role(self, context,choice):
+
+
 @tasks.loop(seconds=1)
 async def reminder():
     cur, conn = getConnect()
@@ -325,6 +363,7 @@ async def reminder():
             #print ('DELETE FROM reminders WHERE "ID" = \'{}\' AND "timestamp" =\'{}\''.format(i[0],i[2]))
     conn.close()
     return
+
 
 def setup(client):
     client.add_cog(Useful(client))
