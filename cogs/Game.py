@@ -126,6 +126,8 @@ class Game(commands.Cog):
         await context.send(embed=embed)
         return
 
+ 
+
 @tasks.loop(seconds=21)
 async def cleanUp():
     global gamesList

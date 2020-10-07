@@ -368,6 +368,48 @@ class Useful(commands.Cog):
             await discord.Member.add_roles(member, role)
             await context.send("Pebble has given you the role, {}".format(role.name))
        
+    @commands.command(name='uid',
+                description="Pebble will add your Genshin Impact UID to the server list",
+                brief="Pebble will add your Genshin Impact UID to the server list",
+                pass_context=True)
+    async def uid(self, context, uid, name):
+        member = context.message.author
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute("select * from genshin where id = \'{}\' AND server = \'{}\'".format(member.id,member.guild.id))
+        result = cur.fetchall()
+        print (result)
+        if not result:
+            cur.execute('INSERT INTO genshin VALUES (\'{}\',\'{}\',\'{}\',\'{}\')'.format(member.id,uid,name,member.guild.id))
+            conn.commit()
+            await context.send("Pebble has added your UID to the Genshin Impact List")
+        else:
+            cur.execute("UPDATE genshin SET uid = \'{}\', name = \'{}\', username = \'{}\' WHERE id = \'{}\' AND server = \'{}\' ".format(uid,name,member,member.id,member.guild.id))
+            conn.commit()
+            await context.send("Pebble has updated your UID and Name in the List")
+        conn.close()
+
+        return
+
+    @commands.command(name='uidlist',
+                description="Pebble will print out the server's list of UID for Genshin Impact",
+                brief="Pebble will print out the server's list of UID for Genshin Impact",
+                pass_context=True)
+    async def uidlist(self, context):
+        member = context.message.author
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute("SELECT * from genshin WHERE server = \'{}\'".format(member.guild.id))
+        result = cur.fetchall()
+        conn.close()
+        if not result:
+            await context.send("Pebble sees there are no UIDs in this server")
+        else:
+            output = '__**UID LIST**__\n'
+            output += '*User : UID : In-Game Name*\n'
+            for i in range(len(result)):
+                output += "{} : {} : {}\n".format(result[i][4],result[i][1],result[i][2])
+        await context.send(output)
 
 @tasks.loop(seconds=1)
 async def reminder():
