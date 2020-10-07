@@ -380,7 +380,7 @@ class Useful(commands.Cog):
         result = cur.fetchall()
         print (result)
         if not result:
-            cur.execute('INSERT INTO genshin VALUES (\'{}\',\'{}\',\'{}\',\'{}\')'.format(member.id,uid,name,member.guild.id))
+            cur.execute('INSERT INTO genshin VALUES (\'{}\',\'{}\',\'{}\',\'{}\',\'{}\')'.format(member.id,uid,name,member.guild.id,member))
             conn.commit()
             await context.send("Pebble has added your UID to the Genshin Impact List")
         else:
