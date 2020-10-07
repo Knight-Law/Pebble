@@ -336,15 +336,38 @@ class Useful(commands.Cog):
             await role.edit(color=int('0x'+hue,0))
             await context.send('Pebble has changed your color')
             return
-
+    
             
-    #  @commands.command(name='role',
-    #                     description="Pebble will give or take away the role of your choice",
-    #                     brief="Pebble will give or take away the role of your choice",
-    #                     pass_context=True,
-    #                     aliases =['cmc'])
-    # async def role(self, context,choice):
+    @commands.command(name='role',
+                        description="Pebble will give or take away the role of your choice",
+                        brief="Pebble will give or take away the role of your choice",
+                        pass_context=True,
+                        hidden=True)
+    async def role(self, context,choice):
+        choice = choice.lower()
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute("SELECT * from roles where command = '{}'".format(choice))
+        role = cur.fetchall()
+        conn.close()
+        if not role:
+            await context.send("Pebble deems your role choice invalid")
+            return
 
+        roleID = role[0][0]
+        member = context.message.author
+        role = get(member.guild.roles, id=int(roleID))
+        hasTheRole = False
+        for i in context.message.author.roles:
+                if i.name == role.name:
+                    hasTheRole = True
+        if hasTheRole:
+            await discord.Member.remove_roles(member, role)
+            await context.send("Pebble has taken away from you the role, {}".format(role.name))
+        else:
+            await discord.Member.add_roles(member, role)
+            await context.send("Pebble has given you the role, {}".format(role.name))
+       
 
 @tasks.loop(seconds=1)
 async def reminder():
