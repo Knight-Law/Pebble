@@ -411,6 +411,16 @@ class Useful(commands.Cog):
                 output += "{} : {} : {}\n".format(result[i][4],result[i][1],result[i][2])
         await context.send(output)
 
+    # @commands.command(name='genshin',
+    #             description="Pebble ",
+    #             brief="Pebble",
+    #             pass_context=True)
+    # async def uidlist(self, context, character):     
+    #     embed = discord.Embed(title=character)
+    #     embed.set_image(url="https://vignette.wikia.nocookie.net/gensin-impact/images/7/78/Character_Klee_Card.jpg/revision/latest?cb=20200401053702I")
+    #     await context.send(embed=embed)  
+
+
 @tasks.loop(seconds=1)
 async def reminder():
     cur, conn = getConnect()

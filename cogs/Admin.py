@@ -1,5 +1,8 @@
 import discord
 import re
+import requests
+from PIL import Image, ImageColor, ImageDraw, ImageSequence, ImageFont
+from io import BytesIO
 from discord.ext import commands
 from main import*
 
@@ -168,6 +171,24 @@ class Admin(commands.Cog):
         embed.add_field(name="\u200b", value='{} has been added to the list'.format(message), inline=False)
         await context.send(embed=embed)
         return
+
+    @commands.command(name='emoji',
+                description="Pebble will add a new emoji to the server",
+                brief="Pebble will add a new emoji to the server",
+                pass_context=True)
+    async def newGame(self, context, name, image):
+        if (not context.message.author.guild_permissions.administrator):
+            await context.send ('```You do not have permission to use this')
+            return
+        response = requests.get(image)
+        img = Image.open(BytesIO(response.content))
+        img = img.resize ((128,128))
+        img.save('emoji.png')
+        
+        guild = context.guild
+        with open("emoji.png", "rb") as img:
+            await discord.Guild.create_custom_emoji(guild,name=name,image=img.read())
+        
 
 def setup(client):
     client.add_cog(Admin(client))
