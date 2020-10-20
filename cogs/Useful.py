@@ -411,14 +411,31 @@ class Useful(commands.Cog):
                 output += "{} : {} : {}\n".format(result[i][4],result[i][1],result[i][2])
         await context.send(output)
 
-    # @commands.command(name='genshin',
-    #             description="Pebble ",
-    #             brief="Pebble",
-    #             pass_context=True)
-    # async def uidlist(self, context, character):     
-    #     embed = discord.Embed(title=character)
-    #     embed.set_image(url="https://vignette.wikia.nocookie.net/gensin-impact/images/7/78/Character_Klee_Card.jpg/revision/latest?cb=20200401053702I")
-    #     await context.send(embed=embed)  
+    @commands.command(name='genshininfo',
+                description="Pebble will give you an info card for the character",
+                brief="Pebble will give you an info card for the character",
+                pass_context=True,
+                aliases=['gi'])
+    async def uidlist(self, context, character):     
+        
+        character = character.lower()
+        await context.send(file=discord.File("Assets/Genshin/Characters/{}.jpg".format(character)))
+    
+    @commands.command(name='genshininfolist',
+                    description="Pebble will show all the choices for the genshininfo command",
+                    brief="Pebble will show all the choices for the genshininfo command",
+                    pass_context=True,
+                    aliases=['gil'])
+    async def files(self, context):
+        characterList = (os.listdir("Assets/Genshin/Characters/"))
+        output = ''
+        for i in range(len(characterList)):
+            if ".jpg" in characterList[i]:
+                output += "{}\n".format(characterList[i].replace('.jpg','').title())
+        if output == '':
+            output = 'No Files'
+        await context.send("```{}```".format(output))
+        return
 
 
 @tasks.loop(seconds=1)

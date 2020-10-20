@@ -187,7 +187,9 @@ class Admin(commands.Cog):
         
         guild = context.guild
         with open("emoji.png", "rb") as img:
-            await discord.Guild.create_custom_emoji(guild,name=name,image=img.read())
+            emoji = await discord.Guild.create_custom_emoji(guild,name=name,image=img.read())
+            message = await context.send ("Pebble has created your new emoji")
+            await message.add_reaction(emoji)
         
 
 def setup(client):
