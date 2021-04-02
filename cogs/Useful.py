@@ -444,7 +444,8 @@ class Useful(commands.Cog):
     async def genshinadventurerank(self, context, currentAdventureRank:int, currentAdventureExp: int, targetedAdventureRank: int):
         adventureRankChart = [0,375,500,625,725,850,950,1075,1175,1300,1425,1525,1650,1775,1875,2000,2375,2500,2625,2775,2825,3425,
         3725,4000,4300,4575,4875,5150,5450,5725,6025,6300,6600,6900,7175,7475,7750,8050,8325,8625,10550,11525,12475,13450,14400,15350,16325,17275,
-        18250, 19200, 26400] #AR 50
+        18250, 19200, 26400, 28800, 31200, 33600, 36000, 232350] #AR 50
+
         max = len(adventureRankChart)
         if currentAdventureRank >= targetedAdventureRank:
             await context.send('Pebble says you cannot go backwards in Adventure Ranks!')
@@ -473,7 +474,8 @@ class Useful(commands.Cog):
     async def advancedgenshinadventurerank(self, context, currentAdventureRank:int, currentAdventureExp: int, targetedAdventureRank: int, resinrefills: int):
         adventureRankChart = [0,375,500,625,725,850,950,1075,1175,1300,1425,1525,1650,1775,1875,2000,2375,2500,2625,2775,2825,3425,
         3725,4000,4300,4575,4875,5150,5450,5725,6025,6300,6600,6900,7175,7475,7750,8050,8325,8625,10550,11525,12475,13450,14400,15350,16325,17275,
-        18250, 19200, 26400] #AR 50
+        18250, 19200, 26400, 28800, 31200, 33600, 36000, 232350] #AR 50
+
         max = len(adventureRankChart)
         if currentAdventureRank >= targetedAdventureRank:
             await context.send('Pebble says you cannot go backwards in Adventure Ranks!')
@@ -491,7 +493,7 @@ class Useful(commands.Cog):
 
         resin = math.ceil((expNeeded/100)*20)
 
-        days = math.ceil(expNeeded / ((((180+(60*1))/20)*100)+1500))
+        days = math.ceil(expNeeded / ((((180+(60*resinrefills))/20)*100)+1500))
 
 
         
