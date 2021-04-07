@@ -84,7 +84,7 @@ class Fun(commands.Cog):
                     description="Select a character and a message in \"\" ",
                     brief="Pebble forces a character to hold a sign",
                     pass_context=True)
-    async def messageToggle(self, context, signChoice, *,message):
+    async def sign(self, context, signChoice, *,message):
         if (len(message)>75):
             await context.send("*Pebble deems your message too long and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
             return
@@ -109,6 +109,21 @@ class Fun(commands.Cog):
         player.save('sign.png')
 
         await context.send(file=discord.File('sign.png'))
+        return
+
+    @commands.command(name='hdemoji',
+                description="Placeholder ",
+                brief="Placeholder",
+                pass_context=True,
+                aliases =['hde'])
+    async def hdemoji(self, context, hdemojiChoice):
+       
+        hdemojiChoice = hdemojiChoice.lower()
+        #Assets/Sign/Sign.png
+        try:
+            await context.send(file=discord.File('Assets/HDEmoji/{}.png'.format(hdemojiChoice)))
+        except:
+            await context.send(file=discord.File('Assets/HDEmoji/{}.gif'.format(hdemojiChoice)))
         return
 
 #Overlays a gif over a targetted user's avatar

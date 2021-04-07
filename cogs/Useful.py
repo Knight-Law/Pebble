@@ -86,6 +86,24 @@ class Useful(commands.Cog):
         await context.send("```{}```".format(output))
         return
 
+    @commands.command(name='HDEmojiList',
+                    description="Pebble will show all the choices for the sign command",
+                    brief="Pebble will show all the choices for the sign command",
+                    pass_context=True,
+                    aliases =['emojilist'])
+    async def HDEmojiList(self, context):
+        characterList = (os.listdir("Assets/HDEmoji/"))
+        output = ''
+        for i in range(len(characterList)):
+            if ".png" in characterList[i]:
+                output += "{}\n".format(characterList[i].replace('.png',''))
+            elif ".gif" in characterList[i]:
+                output += "{}\n".format(characterList[i].replace('.gif',''))
+        if output == '':
+            output = 'No Files'
+        await context.send("```{}```".format(output))
+        return
+
     @commands.command(name='allchannels',
                     description="Pebble will list all of the channels of type",
                     brief="Pebble will list all of the channels of type",
