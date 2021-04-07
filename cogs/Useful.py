@@ -93,7 +93,7 @@ class Useful(commands.Cog):
                     aliases =['emojilist'])
     async def HDEmojiList(self, context):
         characterList = (os.listdir("Assets/HDEmoji/"))
-        characterList = characterList.sort()
+        characterList.sort()
         output = ''
         for i in range(len(characterList)):
             if ".png" in characterList[i]:
