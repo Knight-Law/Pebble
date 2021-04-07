@@ -77,7 +77,7 @@ class Useful(commands.Cog):
     async def files(self, context):
         characterList = (os.listdir("Assets/Sign/"))
         output = ''
-        characterList.remove('Sign.png')
+        characterList.remove('sign.png')
         for i in range(len(characterList)):
             if ".png" in characterList[i]:
                 output += "{}\n".format(characterList[i].replace('.png',''))
@@ -93,6 +93,7 @@ class Useful(commands.Cog):
                     aliases =['emojilist'])
     async def HDEmojiList(self, context):
         characterList = (os.listdir("Assets/HDEmoji/"))
+        characterList = characterList.sort()
         output = ''
         for i in range(len(characterList)):
             if ".png" in characterList[i]:
@@ -453,6 +454,8 @@ class Useful(commands.Cog):
             output = 'No Files'
         await context.send("```{}```".format(output))
         return
+
+      
 
     @commands.command(name='genshinadventurerank',
                     description="Pebble will calculate how much exp you need to get to your Adventure Rank Goal",

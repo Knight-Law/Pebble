@@ -118,7 +118,7 @@ class Fun(commands.Cog):
                 aliases =['hde'])
     async def hdemoji(self, context, hdemojiChoice):
        
-        hdemojiChoice = hdemojiChoice.lower()
+        # hdemojiChoice = hdemojiChoice.lower()
         #Assets/Sign/Sign.png
         try:
             await context.send(file=discord.File('Assets/HDEmoji/{}.png'.format(hdemojiChoice)))
