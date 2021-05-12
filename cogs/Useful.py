@@ -450,7 +450,6 @@ class Useful(commands.Cog):
         output = ''
         for i in range(len(characterList)):
             if ".jpg" in characterList[i]:
-                print (i)
                 output += "{}\n".format(characterList[i].replace('.jpg','').title())
         if output == '':
             output = 'No Files'
