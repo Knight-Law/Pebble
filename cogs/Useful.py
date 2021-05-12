@@ -446,9 +446,11 @@ class Useful(commands.Cog):
                     aliases=['gil'])
     async def genshininfolist(self, context):
         characterList = (os.listdir("Assets/Genshin/Characters/"))
+        characterList.sort()
         output = ''
         for i in range(len(characterList)):
             if ".jpg" in characterList[i]:
+                print (i)
                 output += "{}\n".format(characterList[i].replace('.jpg','').title())
         if output == '':
             output = 'No Files'
