@@ -10,6 +10,7 @@ from discord.ext import tasks
 from discord.utils import get
 from main import*
 from datetime import datetime,timedelta
+from discord_slash import cog_ext, SlashContext
 
 clientReference = client
 
@@ -68,8 +69,7 @@ class Useful(commands.Cog):
         else:
             await context.send("*Pebble deems your image type invalid and rolls away*. <a:PebbleIconAnimation:746859796585513040>")
             return
-    
-
+  
     @commands.command(name='signList',
                     description="Pebble will show all the choices for the sign command",
                     brief="Pebble will show all the choices for the sign command",
@@ -103,8 +103,21 @@ class Useful(commands.Cog):
         if output == '':
             output = 'No Files'
         await context.send("```{}```".format(output))
-        return
-
+        
+    @cog_ext.cog_slash(name="HDEmojiList",
+                    description="Pebble will show all the choices for the HDEmoji command",)
+    async def HDEmojiListSlash(self, context):
+        characterList = (os.listdir("Assets/HDEmoji/"))
+        characterList.sort()
+        output = ''
+        for i in range(len(characterList)):
+            if ".png" in characterList[i]:
+                output += "{}\n".format(characterList[i].replace('.png',''))
+            elif ".gif" in characterList[i]:
+                output += "{}\n".format(characterList[i].replace('.gif',''))
+        if output == '':
+            output = 'No Files'
+        await context.send("```{}```".format(output))
     @commands.command(name='allchannels',
                     description="Pebble will list all of the channels of type",
                     brief="Pebble will list all of the channels of type",
@@ -430,6 +443,24 @@ class Useful(commands.Cog):
                 output += "{} : {} : {}\n".format(result[i][4],result[i][1],result[i][2])
         await context.send("```{}```".format(output))
 
+    @cog_ext.cog_slash(name="uidlist",
+                    description="Pebble will print out the server's list of UID for Genshin Impact",)
+    async def uidlistSlash(self, context):
+        member = context.message.author
+        cur, conn = getConnect()
+        cur = conn.cursor()
+        cur.execute("SELECT * from genshin WHERE server = \'{}\'".format(member.guild.id))
+        result = cur.fetchall()
+        conn.close()
+        if not result:
+            await context.send("Pebble sees there are no UIDs in this server")
+        else:
+            output = 'UID LIST\n'
+            output += 'User : UID : In-Game Name\n'
+            for i in range(len(result)):
+                output += "{} : {} : {}\n".format(result[i][4],result[i][1],result[i][2])
+        await context.send("```{}```".format(output))
+
     @commands.command(name='genshininfo',
                 description="Pebble will give you an info card for the character",
                 brief="Pebble will give you an info card for the character",
@@ -438,7 +469,14 @@ class Useful(commands.Cog):
     async def genshininfo(self, context, character):     
         character = character.lower()
         await context.send(file=discord.File("Assets/Genshin/Characters/{}.jpg".format(character)))
-    
+
+    @cog_ext.cog_slash(name="genshininfo",
+                    description="Pebble will give you an info card for the character")
+    async def genshininfoSlash(self, context, character):    
+        character = character.lower()
+        await context.send(file=discord.File("Assets/Genshin/Characters/{}.jpg".format(character)))
+
+
     @commands.command(name='genshininfolist',
                     description="Pebble will show all the choices for the genshininfo command",
                     brief="Pebble will show all the choices for the genshininfo command",
@@ -455,7 +493,19 @@ class Useful(commands.Cog):
             output = 'No Files'
         await context.send("```{}```".format(output))
         return
-
+    @cog_ext.cog_slash(name="genshininfolist",
+                    description="Pebble will show all the choices for the genshininfo command")
+    async def genshininfolistSlash(self, context):
+        characterList = (os.listdir("Assets/Genshin/Characters/"))
+        characterList.sort()
+        output = ''
+        for i in range(len(characterList)):
+            if ".jpg" in characterList[i]:
+                output += "{}\n".format(characterList[i].replace('.jpg','').title())
+        if output == '':
+            output = 'No Files'
+        await context.send("```{}```".format(output))
+        return
       
 
     @commands.command(name='genshinadventurerank',
@@ -484,8 +534,6 @@ class Useful(commands.Cog):
             expNeeded += adventureRankChart[i]
 
         resin = math.ceil((expNeeded/100)*20)
-
-        
         await context.send('```Total Current Adventure Rank EXP: {}\nCurrent Adventure Rank: {}\nTargeted Adventure Rank: {}\nAdventure Rank EXP Required: {}\nResin Required: {}```'.format(totalExp, currentAdventureRank, targetedAdventureRank, expNeeded, resin))
 
     @commands.command(name='advancedgenshinadventurerank',
@@ -517,13 +565,35 @@ class Useful(commands.Cog):
 
         days = math.ceil(expNeeded / ((((180+(60*resinrefills))/20)*100)+1500))
 
-
-        
-        
         await context.send('```Total Current Adventure Rank EXP: {}\nCurrent Adventure Rank: {}\nTargeted Adventure Rank: {}\nAdventure Rank EXP Required: {}\nResin Required: {}\nDays: {}```'.format(totalExp, currentAdventureRank, targetedAdventureRank, expNeeded, resin,days))
 
+        @cog_ext.cog_slash(name="advancedgenshinadventurerank",
+                    description="Pebble will calculate how much exp you need to get to your Adventure Rank Goal",)
+        async def advancedgenshinadventurerankSlash(self, context, currentAdventureRank:int, currentAdventureExp: int, targetedAdventureRank: int, resinrefills: int):
+            adventureRankChart = [0,375,500,625,725,850,950,1075,1175,1300,1425,1525,1650,1775,1875,2000,2375,2500,2625,2775,2825,3425,
+            3725,4000,4300,4575,4875,5150,5450,5725,6025,6300,6600,6900,7175,7475,7750,8050,8325,8625,10550,11525,12475,13450,14400,15350,16325,17275,
+            18250, 19200, 26400, 28800, 31200, 33600, 36000, 232350, 258950, 285750, 312825, 340125] #AR 60 #AR 50
 
+            max = len(adventureRankChart)
+            if currentAdventureRank >= targetedAdventureRank:
+                await context.send('Pebble says you cannot go backwards in Adventure Ranks!')
+                return
+            elif targetedAdventureRank > max:
+                await context.send('Pebble does not how much experience is required for that rank yet')
+                return
+            totalExp = currentAdventureExp
+            for i in range(currentAdventureRank):
+                totalExp += adventureRankChart[i]
 
+            expNeeded = -(currentAdventureExp)
+            for i in range(currentAdventureRank, targetedAdventureRank):
+                expNeeded += adventureRankChart[i]
+
+            resin = math.ceil((expNeeded/100)*20)
+
+            days = math.ceil(expNeeded / ((((180+(60*resinrefills))/20)*100)+1500))
+
+            await context.send('```Total Current Adventure Rank EXP: {}\nCurrent Adventure Rank: {}\nTargeted Adventure Rank: {}\nAdventure Rank EXP Required: {}\nResin Required: {}\nDays: {}```'.format(totalExp, currentAdventureRank, targetedAdventureRank, expNeeded, resin,days))
 
 
 @tasks.loop(seconds=1)

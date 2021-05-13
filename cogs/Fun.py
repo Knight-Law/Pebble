@@ -8,6 +8,7 @@ from discord.ext import commands
 from PIL import Image, ImageColor, ImageDraw, ImageSequence, ImageFont
 from io import BytesIO
 from main import*
+from discord_slash import cog_ext, SlashContext
 
 class Fun(commands.Cog):
     description = "Pebble's commands that will gift the user with entertainment"
@@ -117,6 +118,17 @@ class Fun(commands.Cog):
                 pass_context=True,
                 aliases =['hde'])
     async def hdemoji(self, context, hdemojiChoice):
+       
+        # hdemojiChoice = hdemojiChoice.lower()
+        #Assets/Sign/Sign.png
+        try:
+            await context.send(file=discord.File('Assets/HDEmoji/{}.png'.format(hdemojiChoice)))
+        except:
+            await context.send(file=discord.File('Assets/HDEmoji/{}.gif'.format(hdemojiChoice)))
+        return
+    @cog_ext.cog_slash(name="hdemoji",
+                    description="Pebble will upload a hdemoji of your choice from the list",)
+    async def hdemojiSlash(self, context, hdemojiChoice):
        
         # hdemojiChoice = hdemojiChoice.lower()
         #Assets/Sign/Sign.png
