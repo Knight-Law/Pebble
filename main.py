@@ -17,8 +17,8 @@ from discord_slash import SlashCommand, SlashContext
 BOT_PREFIX = (".")
 # client = Bot(command_prefix=BOT_PREFIX)
 client = commands.Bot(command_prefix=BOT_PREFIX)
-# slash = SlashCommand(client, override_type = True)
-slash = SlashCommand(client, sync_commands=True,override_type = True)
+slash = SlashCommand(client, override_type = True)
+# slash = SlashCommand(client, sync_commands=True,override_type = True)
 
 def testConnect():
     conn = None
