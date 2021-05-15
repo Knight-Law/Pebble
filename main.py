@@ -14,7 +14,7 @@ from config import config
 from discord_slash import SlashCommand
 
 
-BOT_PREFIX = ("*")
+BOT_PREFIX = (".")
 client = Bot(command_prefix=BOT_PREFIX)
 # client = commands.Bot(command_prefix=BOT_PREFIX)
 # slash = SlashCommand(client, override_type = True)
