@@ -11,14 +11,15 @@ from discord.ext import tasks
 from discord.ext import commands
 from discord.ext.commands import Bot
 from config import config
-from discord_slash import SlashCommand, SlashContext
+from discord_slash import SlashCommand
 
 
-BOT_PREFIX = (".")
-# client = Bot(command_prefix=BOT_PREFIX)
-client = commands.Bot(command_prefix=BOT_PREFIX)
-slash = SlashCommand(client, override_type = True)
-# slash = SlashCommand(client, sync_commands=True,override_type = True)
+BOT_PREFIX = ("*")
+client = Bot(command_prefix=BOT_PREFIX)
+# client = commands.Bot(command_prefix=BOT_PREFIX)
+# slash = SlashCommand(client, override_type = True)
+# slash = SlashCommand(client, sync_commands=True)
+slash = SlashCommand(client, sync_commands=True,override_type = True)
 
 def testConnect():
     conn = None

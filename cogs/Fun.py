@@ -128,14 +128,14 @@ class Fun(commands.Cog):
         return
     @cog_ext.cog_slash(name="hdemoji",
                     description="Pebble will upload a hdemoji of your choice from the list",)
-    async def hdemojiSlash(self, context, hdemojiChoice):
+    async def hdemojiSlash(self, context, hdemojichoice):
        
         # hdemojiChoice = hdemojiChoice.lower()
         #Assets/Sign/Sign.png
         try:
-            await context.send(file=discord.File('Assets/HDEmoji/{}.png'.format(hdemojiChoice)))
+            await context.send(file=discord.File('Assets/HDEmoji/{}.png'.format(hdemojichoice)))
         except:
-            await context.send(file=discord.File('Assets/HDEmoji/{}.gif'.format(hdemojiChoice)))
+            await context.send(file=discord.File('Assets/HDEmoji/{}.gif'.format(hdemojichoice)))
         return
 
 #Overlays a gif over a targetted user's avatar
