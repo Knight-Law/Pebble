@@ -567,7 +567,7 @@ class Useful(commands.Cog):
 
         await context.send('```Total Current Adventure Rank EXP: {}\nCurrent Adventure Rank: {}\nTargeted Adventure Rank: {}\nAdventure Rank EXP Required: {}\nResin Required: {}\nDays: {}```'.format(totalExp, currentAdventureRank, targetedAdventureRank, expNeeded, resin,days))
 
-        @cog_ext.cog_slash(name="advancedgenshinadventurerank",
+        @cog_ext.cog_slash(name="genshinadventurerank",
                     description="Pebble will calculate how much exp you need to get to your Adventure Rank Goal",)
         async def advancedgenshinadventurerankSlash(self, context, currentadventurerank:int, currentadventureexp: int, targetedadventurerank: int, resinrefills: int):
             adventureRankChart = [0,375,500,625,725,850,950,1075,1175,1300,1425,1525,1650,1775,1875,2000,2375,2500,2625,2775,2825,3425,
