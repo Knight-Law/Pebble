@@ -7,14 +7,16 @@ import psycopg2
 import re
 from datetime import datetime
 from discord import Game
-from discord.ext import tasks
-from discord.ext import commands
+from discord.ext import tasks, commands
 from discord.ext.commands import Bot
 from config import config
 from discord_slash import SlashCommand
 
-
-BOT_PREFIX = (".")
+try:
+    fp = open(os.path.join(sys.path[0], 'prefix.txt'), 'r')
+    BOT_PREFIX = fp.read()
+finally:
+    fp.close()
 client = Bot(command_prefix=BOT_PREFIX)
 # client = commands.Bot(command_prefix=BOT_PREFIX)
 # slash = SlashCommand(client, override_type = True)
@@ -102,6 +104,8 @@ async def on_message(message):
 
 
 
+
+
 #Exit 
 @client.command(name='exit',
                 description="Pebble goes bye",
@@ -118,3 +122,5 @@ async def endProgram(context):
 if __name__ == '__main__':
     testConnect()
     initilizeBot()
+    
+    

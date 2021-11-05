@@ -3,6 +3,7 @@ import requests
 import os
 import math
 import random
+import threading
 from io import BytesIO
 from PIL import Image, ImageSequence
 from discord.ext import commands
@@ -26,6 +27,7 @@ class Useful(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         reminder.start()
+        printer.start()
         print('Useful Cog is good.')
 
     @commands.command(name='resize',
@@ -613,6 +615,23 @@ async def reminder():
             #print ('DELETE FROM reminders WHERE "ID" = \'{}\' AND "timestamp" =\'{}\''.format(i[0],i[2]))
     conn.close()
     return
+
+@tasks.loop(seconds=1.0)
+async def printer():
+   
+    now = datetime.now()
+    current_time = now.strftime("%H:%M:%S")
+    # print("Current Time =", current_time)
+
+    if(current_time == '16:00:00'):  
+        channel = clientReference.get_channel(554802516731363372)
+        await channel.send("Time for Check-In - https://webstatic-sea.mihoyo.com/ys/event/signin-sea/index.html?act_id=e202102251931481&lang=en-us")
+    else:
+        channel = clientReference.get_channel(554802516731363372)
+        await channel.send("Time for Check-In - https://webstatic-sea.mihoyo.com/ys/event/signin-sea/index.html?act_id=e202102251931481&lang=en-us")
+
+    
+    
 
 
 def setup(client):
