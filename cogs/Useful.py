@@ -27,7 +27,7 @@ class Useful(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         reminder.start()
-        printer.start()
+        genshincheckin.start()
         print('Useful Cog is good.')
 
     @commands.command(name='resize',
@@ -617,19 +617,17 @@ async def reminder():
     return
 
 @tasks.loop(seconds=1.0)
-async def printer():
+async def genshincheckin():
    
     now = datetime.now()
     current_time = now.strftime("%H:%M:%S")
     # print("Current Time =", current_time)
 
     if(current_time == '16:00:00'):  
-        channel = clientReference.get_channel(554802516731363372)
+        channel = clientReference.get_channel(759970335641698354)
         await channel.send("Time for Check-In - https://webstatic-sea.mihoyo.com/ys/event/signin-sea/index.html?act_id=e202102251931481&lang=en-us")
     else:
-        channel = clientReference.get_channel(554802516731363372)
-        await channel.send("Time for Check-In - https://webstatic-sea.mihoyo.com/ys/event/signin-sea/index.html?act_id=e202102251931481&lang=en-us")
-
+        pass
     
     
 
